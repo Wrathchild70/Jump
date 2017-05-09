@@ -1,0 +1,397 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<META NAME="Generator" CONTENT="Microsoft Word 97">
+<TITLE>Jump2 Native-Code Interfacing</TITLE>
+<META NAME="Template" CONTENT="D:\Program Files\Microsoft Office\Office\html.dot">
+</HEAD>
+<BODY TEXT="#000000" LINK="#0000ff" VLINK="#800080" BGCOLOR="#ffffff">
+
+<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=10 WIDTH=620>
+<TR><TD WIDTH="21%" VALIGN="MIDDLE">
+<H1><IMG SRC="min-logo.gif" WIDTH=128 HEIGHT=121></H1></TD>
+<TD WIDTH="79%" VALIGN="MIDDLE">
+<H1>Jump 2 Native-Code Interfacing</H1>
+<H2>Version 2.2</H2>
+<P>10-Feb-2004 originally by Ralf Kleberhoff ( <A HREF="mailto:kleberhoff@aol.com">kleberhoff@aol.com</A> ) and updated by Peter Dickerson</TD>
+</TR>
+</TABLE>
+
+<B><FONT SIZE=4><P>WARNING</P>
+</B></FONT><P>Jump2 is still under development. Don't expect a completely stable development environment. Jump2 might or might not work as expected. Don't blame me if something goes wrong - you have been warned...</P>
+<P><HR></P>
+<H2>Table of Contents</H2>
+<STRONG><P>1 </STRONG><A HREF="#native"><U><FONT COLOR="#0000ff"><STRONG>Native Code Interface</U></FONT></STRONG></A><STRONG><BR>
+2 </STRONG><A HREF="#coding-rules"><U><FONT COLOR="#0000ff"><STRONG>Coding Rules</U></FONT></STRONG></A><STRONG><BR>
+3 </STRONG><A HREF="#native-exceptions"><U><FONT COLOR="#0000ff"><STRONG>Exception Handling and Native Code</U></FONT></STRONG></A>&nbsp;</P>
+<P><HR></P>
+<H1><A NAME="native"></A>1 Native Code Interface</H1>
+<P>Jump supports the Java <I>native</I> keyword for calling methods implemented in 68K assembly language. </P>
+<P>Jump's native-code interface does not conform to JNI (what a surprise!?).</P>
+<P>It is used by Jump itself to implement various native parts of the java.lang package, and also to implement the PalmOS API function stubs. The implementations of native methods are loaded from files that normally begin with "native-" and end with ".asm".</P>
+<P>You can write native methods yourself, and if you want to do so, this text gives you some hints (for the remaining questions, ask me).</P>
+<P>You name your native files in the 'xxx.jump' project-specific properties file, under the key 'natives' as space-separated list; just use the filename without the path, they are searched for via CLASSPATH.</P>
+<P>To create your own native methods:</P>
+
+<UL>
+<LI>Declare some method(s) in some class(es) as <I>native</I> (not strictly necessary in Jump2, but as a matter of style, you should do it). This indicates to the Java compiler and Jump that the implementation of the method is not in Java, but is an external method. That's plain Java, nothing special. </LI>
+<LI>Create a native-*.asm file to hold the implementation of the method, and write the assembler code for the method in this file (hints on how to write methods for Jump follow below). Include the name of this file in the project-properties file 'xxx.jump' under the key 'natives'. </LI></UL>
+
+<P>You may put more than one native method implementation in a native .asm file. Each method implementation must be separated by at least one blank line, and method implementations cannot contain any blank lines. </P>
+<P>Note that in Jump2 it is possible to install a native implementation not only for methods declared native, but for all methods. A native implementation takes precedence over the Java version.</P>
+<P>Each method implementation must begin with a specially formatted comment line, exactly naming the method implemented here. Naming scheme is the JVM-internal scheme based on type signatures. Have a look at the following example native-java.asm.</P>
+<H3>Simple example</H3>
+<P>Here is a simple example of a native method declaration and implementation:</P>
+<U><P>NativeTest.java</U> </P>
+<PRE>  package dummy;
+  class NativeTest {
+    public native static int add(int x, int y);
+  }</PRE>
+<U><P>native-test.asm</U> </P>
+<PRE>  ;; native-method dummy/NativeTest.add(II)I
+          move.l  4(a7),d0
+          add.l   8(a7),d0
+          rts</PRE>
+<U><P>NativeTest.jump</U> </P>
+<PRE>  natives=native-test.asm</PRE>
+<P>To allow for Jump's high degree of optimization, Jump needs to know some properties your program's classes and methods (are there instances of this class, does this method call another one, what fields does it use, and so on). For Java methods, Jump can find it all out from inspection of the code. For native code, you have to supply this information by means of specially-formatted comment lines.</P>
+<P><HR></P>
+<H1><A NAME="coding_rules"></A>2 Coding Rules</H1>
+<H3>Syntax extensions</H3>
+<P>Jump's *.asm input files have some extensions when compared to plain Pila syntax.</P>
+<TABLE BORDER CELLSPACING=1 WIDTH=620>
+<TR><TD WIDTH="43%" VALIGN="MIDDLE">
+<PRE>#define <EM>name</PRE></EM></TD>
+<TD WIDTH="57%" VALIGN="MIDDLE">
+<P>Defines <EM>name</EM> so that #ifdef constructs can refer to it. Case is significant. This construct allows for conditional assembly similar to C preprocessor directives.</P>
+<P>Depending on the code options selected, Jump defines 3 names useful for conditional assembly:</P>
+
+<UL>
+<LI>MULTI_SEGMENT (memory models 'large' and 'huge') </LI>
+<LI>DM_HEAP (memory model 'huge') </LI>
+<LI>WABAJUMP (WabaJump mode) </UL>
+</TD>
+</TR>
+<TR><TD WIDTH="43%" VALIGN="MIDDLE">
+<PRE>#ifdef <EM>name
+</EM>    <EM>&lt;code1&gt;
+</EM>#else
+    <EM>&lt;code2&gt;
+</EM>#endif</PRE></TD>
+<TD WIDTH="57%" VALIGN="MIDDLE">
+<P>If there was a #define line for the <EM>name</EM>, <EM>&lt;code1&gt;</EM> is assembled, otherwise <EM>&lt;code2&gt;</EM>.</P>
+<P>The #else line and <EM>&lt;code2&gt;</EM> are optional.</P>
+<P>#ifdef constructs can be nested.</P>
+<P>#ifdef always refers to #define constructs, not to #defmacro or any Pila directive.</TD>
+</TR>
+<TR><TD WIDTH="43%" VALIGN="MIDDLE">
+<PRE>#defmacro <EM>macroname par1,par2,...
+    &lt;expansion-code&gt;
+</EM>#endmacro</PRE></TD>
+<TD WIDTH="57%" VALIGN="MIDDLE">
+<P>This defines a macro with the given <EM>macroname</EM> and parameters. Separate the parameters by one comma, without a space.</P>
+<P>If this macroname is later used in the opcode position of a line, then this line is replaced by expansion code. Parameters are recognized in the expansion code by a simple substring comparison, ignoring any syntax issues. So don't use parameter names that can be confused with something else. </P>
+<P>There are some useful predefined macros:</P>
+
+<UL>
+<LI>bsr.far <EM>label</EM> --- calls a subroutine that might be located in a different code segment. </LI>
+<LI>bra.far <EM>label</EM> --- branches to a label that might be located in a different code segment. </LI></UL>
+
+<P>The following predefined macros are used internally for the 'huge' memory model:</P>
+
+<UL>
+<LI>mem.reserve --- enables write-access to the heap </LI>
+<LI>mem.reserve.savereg --- enables write-access to the heap, preserving all registers </LI>
+<LI>mem.release --- disables write-access to the heap </LI>
+<LI>mem.release.savereg --- disables write-access to the heap, preserving all registers </LI>
+<LI>proxy.get --- allocate a proxy-object in dynamic memory </LI>
+<LI>proxy.release --- copy contents of proxy-object back into original place </UL>
+</TD>
+</TR>
+<TR><TD WIDTH="43%" VALIGN="MIDDLE">
+<PRE>    <EM>macroname arg1,arg2</PRE></EM></TD>
+<TD WIDTH="57%" VALIGN="MIDDLE">
+<P>If <EM>macroname</EM> has been defined with a #defmacro construct, this line is replaced with the &lt;expansion-code&gt; from the definition. Separate the arguments by one comma, without a space.</P>
+<P>When using the macro, for every parameter <EM>par&lt;n&gt;</EM> from the definition there must be a corresponding argument <EM>arg&lt;n&gt;</EM>. All occurrences of a parameter in the <EM>&lt;expansion-code&gt;</EM> are replaced by the corresponding argument. This replacement is done by a simple string comparison and replacement.</TD>
+</TR>
+<TR><TD WIDTH="43%" VALIGN="MIDDLE">
+<PRE>    data
+    ...
+    enddata</PRE></TD>
+<TD WIDTH="57%" VALIGN="MIDDLE">
+<P>Pila's standard 'data' directive must be paired with a Jump-specific 'enddata' directive. The enddata directive switches back to the segment that was current before the data directive. In the 'large' and 'huge' memory model, most code isn't located in the code segment (code 1 resource), but in resource segments of type 'code' with higher numbers. This 'enddata' extensions allows static-variable definitions to be included into the source at any point.</TD>
+</TR>
+<TR><TD WIDTH="43%" VALIGN="MIDDLE">
+<PRE>;; <EM>&lt;code-information&gt;</PRE></EM></TD>
+<TD WIDTH="57%" VALIGN="MIDDLE">
+<P>Jump relies on specially-formatted comment lines to allow for the integration of assembly language routines into the Java program. These lines begin with double semi-colons. They are explained in detail below.</TD>
+</TR>
+</TABLE>
+
+<P>&nbsp;</P>
+<H3>Basic Jump coding rules</H3>
+<P>You get the arguments on the stack. Note that arguments to Java methods are pushed from <I>left to right</I>. This is different from the way arguments are passed to PalmOS API functions. Arguments are popped from the stack by the caller. So your native method just reads from the parameter stack without modifying it. Return values are passed in registers:</P>
+
+<UL>
+<LI>d0 for types boolean, byte, char, short, int and float, </LI>
+<LI>d0 (high part) and d1 (low part) for long or double values, </LI>
+<LI>a0 for reference types (objects and arrays). </LI></UL>
+
+<P>Native methods can have local variables on the stack. If you want to link the a6 register (allocate a stack frame), be sure to read and understand the <A HREF="#native-exceptions">chapter on native code and exceptions</A>.</P>
+<P>Native methods can declare static data by means of the 'data' directive (as usual with Pila), but <I><FONT COLOR="#ff0000"><STRONG>they must switch back to the code segment by means of a Jump-specific directive 'enddata'</I></FONT></STRONG>. Do not forget to use the 'enddata' directive. Do not use the 'code' directive to switch back. In the 'large' memory model, native methods aren't placed in the code segment, but in additional code resources, so switching to the code segment leaves you in the wrong place! Use 'enddata', and Jump arranges everything for you.</P>
+<P>There are more keywords in native files than just "native-method". These additional keywords are necessary if you want to access some other java elements (access a field, call a method, create an instance, ...). They are written as a block of comment lines before the assembly instructions, beginning with a "native-method" or "jvm-opcode" line, each line starting with a double semi-colon:</P>
+<TABLE BORDER CELLSPACING=1 WIDTH=620>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>;; kernel-routines</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>Only to be used in the kernel.asm file, means that the whole file is included.</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>;; early-init <EM>classname</EM></TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>This will cause the class initializer &lt;clinit&gt; to be called early. The initializers are called in the order of appearance. Other class initializers are called in an arbitrary order after these. The command does not force a class initializer to be present if it not otherwise needed. An entry in one of the property files will have a similar affect. This option is useful if there is a native-*.asm file is associated with a class library and that library requires that some of its classes be initialized in a specific order. The user of the class library does not need to be aware of this and does not need to add early-init statement to the <EM>project</EM>.<CODE>jump</CODE> file, just the native file..</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>;; native-method <EM>method-name</EM></TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>The following subroutine implements the given method.</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>;; empty-method <EM>method-name</EM></TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>The method specified does nothing. Direct calls to the method are removed. Vtable references point to a single copy of an empty method (<CODE>rts</CODE>). Methods that do nothing except call an empty method may also be marked as empty.</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>;; jvm-opcode <EM>opcode-name</EM></TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>Only to be used in the native-opcodes.asm file, means that the following subroutine implements the given JVM opcode. </TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>;; uses-class <EM>classname</EM> [as <EM>symbol</EM>]</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>The native code declared here depends on the given class. If a <EM>symbol</EM> is given, all occurrences of this symbol in the native code are replaced by the class-index of the given class.</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>;; uses-cast-target <EM>classname</EM> as <EM>symbol</EM></TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>The native code declared here checks instances for membership of class or interface <EM>classname</EM>. All ocurrences of the <EM>symbol</EM> are replaced by the class's Itable index. Use an instruction sequence like:</P>
+<PRE>        ;; a0 points to instance
+        bsr.far getclassinfo_a0
+offset  set     <EM>symbol</EM>&gt;&gt;3
+bitno   set     <EM>symbol</EM>&amp;7
+        btst    #bitno,ClassInfo.Itable+offset(a0)</PRE>
+<P>If the bit tested is one, the instance is an instance of <EM>classname</EM>.</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>;; uses-instance <EM>classname</EM></TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>The native code declared here possibly creates instances of the given class. The exact class must be given, not a subclass, a superclass or an interface.</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>;; needs-exact-layout <EM>classname</EM></TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>The native code declared here directly accesses fields of the given class, treating it like a C-language structure. This makes Jump reproduce a struct-like layout of <U>all</U> fields and not eliminate unneeded fields.</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>;; uses-method <EM>method</EM> [as <EM>symbol</EM>]</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>The native code declared here calls the given method. The method meant is exactly the one specified, and not an overriding implementation in a subclass. If a <EM>symbol</EM> is given, all occurrences of this symbol in the native code are replaced by the assembly label of the method. </TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>;; uses-field <EM>field</EM> [as <EM>symbol</EM>]</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>The native code declared here uses the given field. If a <EM>symbol</EM> is given for a <U>static</U> field, all occurrences of this symbol are replaced by the assembly label of the field. If a <EM>symbol</EM> is given for a <U>normal (instance)</U> field, all occurrences of the symbol are replaced by the decimal representation of the offset of the field.</TD>
+</TR>
+</TABLE>
+
+<H3>Calling a method</H3>
+<P>Declare that you need a method and obtain its entry-point symbol by means of a ";; uses-method <EM>method</EM> as <EM>symbol</EM>" clause. </P>
+<P>Prepare the stack pushing the instance and the arguments (or only the arguments if you call a static method).</P>
+<P>Call the method using a Jump-specific syntax:</P>
+<PRE>    bsr.far   <EM>method</PRE>
+</EM><P>If from within your code, you want to call (or jump to) subroutines/methods that reside outside of your native code snippet, <I><FONT COLOR="#ff0000"><STRONG>do NOT simply use 'bsr' or 'bra' instructions</I></FONT></STRONG> because the target might be outside of the +/-32 KByte reachable range for these instructions (in the 'large' memory model). <I><FONT COLOR="#ff0000"><STRONG>Instead, use the Jump-defined macros 'bsr.far' and 'bra.far'.</I></FONT></STRONG> They are translated to normal 'bsr' and 'bra' instructions in the 'small' model, and to memory-indirect jumps in the large model. <I><FONT COLOR="#ff0000"><STRONG>You won't get a warning if you use 'bsr' or 'bra', your code will still run fine in the 'small' model, but will completely crash in the 'large' model. So, be careful, it's your responsibility!</P>
+</I></FONT></STRONG><P>From assembly, you don't have virtual calling capabilities. Calling an instance method from assembly works a bit different from Java's method calling:</P>
+
+<UL>
+<LI>In Java, the instance on which you call the method decides which method really gets control. If it's from a subclass that overrides the method that you called, you'll get the subclass version; if the instance is from a superclass, you'll get the superclass version of the method. </LI>
+<LI>In Jump native code, you don't have access to this dynamic method selection. Your method call will go to exactly the method implementation that you named, and never to a subclass version. </LI></UL>
+
+<P>Remove the arguments and the instance from the stack. The method you called didn't do it, but it was free to change the arguments on the stack, so this stack area doesn't contain any valid data. Don't be tempted to re-use the stack entries (only the instance won't be changed).</P>
+<P>Get the result from d0, or d0 and d1, or a0.</P>
+<H3>Accessing a static field</H3>
+<P>Declare that you need the field and obtain its static-data relative symbol by means of a ";; uses-field <EM>field</EM> as <EM>symbol</EM>" clause. </P>
+<P>Reference the field as a normal a5-relative variable, e.g. to read an integer:</P>
+<PRE>    move.l   <EM>symbol</EM>(a5),d0</PRE>
+<H3>Accessing an instance field</H3>
+<P>Declare that you need the field and obtain its offset by means of a ";; uses-field <EM>field</EM> as <EM>symbol</EM>" clause. </P>
+<P>Reference the field relative to its instance pointer, e.g. if a0 points to the instance:</P>
+<PRE>    move.l   <EM>symbol</EM>(a0),d0</PRE>
+<H3>Constructing an instance</H3>
+<P>Declare that there will be instances of the class by a ";; uses-instance <EM>classname</EM>" clause.</P>
+<P>Get the classindex by means of a ";; uses-class <EM>classname</EM> as <EM>symbol</EM>" clause.</P>
+<P>Obtain the desired &lt;init&gt; method by means of a ";; uses-method <EM>method</EM> as <EM>init_symbol</EM>" clause.</P>
+<P>To create the instance, follow this code pattern:</P>
+<PRE>    move.l   #<EM>symbol</EM>,d0
+    bsr.far  op_new        ; this leaves the new instance pushed onto the stack
+    <EM>  &lt;push the arguments for the initializer onto the stack</EM>&gt;
+    bsr.far  <EM>init_symbol
+      &lt;remove the arguments from the stack, keeping the instance&gt;</PRE>
+</EM><P>A pointer to the instance is now on top of the stack. The instance's data begins at -2(ptr) with a 2-byte header, the pointer points to the first user byte, corresponding to the first declared instance field of the topmost superclass. At -2(ptr) there's a word containing the classindex of the instance. </P>
+<P>The memory has been dynamically allocated. It will be freed by the garbage collector when the instance is no longer used.</P>
+<H3>Accessing an instance as if it were a struct</H3>
+<P>What does that mean?</P>
+<P>Suppose you have some non-java code (e.g. PalmOS traps) that defines and uses structs for various purposes. And you have <I><FONT COLOR="#ff0000"><STRONG>carefully</I></FONT></STRONG> written a Java class with instance fields resembling that struct. Your non-java code assumes that all fields are present at the correct offsets. An example is the 'palmos.Event' class resembling the PalmOS structure 'EventType'.</P>
+<P>But Jump normally feels free to eliminate fields from instances if they aren't used. This probably crashes your program. So, you have to tell Jump that all the fields of this class must be kept, in correct order.</P>
+<P>This is done by ";; needs-exact-layout <EM>classname</EM>". With this clause in effect, you get a predictable memory layout for the class mentioned. The clause also tells Jump that there will be instances of this class (exact layout without instances would be nonsense, wouldn't it?). All subclasses will also have this layout for the fields inherited (being located at the beginning of the instance's user data), but won't have a predictable layout for their own fields. Jump's lengthy protocol output (with the -V option) will tell the offsets of a class'es fields, be sure to check them against the original C structure.</P>
+<H3>Calling PalmOS</H3>
+<P>In the 'huge' memory model some special precautions are needed for calling PalmOS. Here's why:</P>
+<P>In this memory model, instances live in data-storage memory, with the normal write-protection switched off by means of the (undocumented, but well-known) MemSemaphoreReserve system trap. This allows Jump to access the instance fields directly, without DmWrite. But before calling PalmOS, Jump re-arranges everything just the way PalmOS likes it:</P>
+
+<UL>
+<LI>re-enables write-protection by means of the MemSemaphoreRelease system trap, </LI>
+<LI>produces "proxy" data structures as copies of all instances that PalmOS is expected to write into. </LI>
+<LI>calls PalmOS, </LI>
+<LI>disables write-protection again, </LI>
+<LI>copies back the proxies into the original instances. </LI></UL>
+
+<P>If your native code wants to call PalmOS, use the native-palmos.asm file as your guideline on how to do it, and contact me for assistance. Or call the wrapper methods from the palmos.Palm class instead.</P>
+<P><HR></P>
+<H1><A NAME="native_exceptions"></A>3 Exception Handling and Native Code</H1>
+<P>If it's possible that an exception arises whithin your native routine (or within code that you call), you must be careful not to break the exception-passing chain.</P>
+<P>There are 3 situations:</P>
+
+<UL>
+<LI>You don't throw exceptions and you don't call methods that can eventually throw exceptions. <STRONG>Then you can skip this chapter.</STRONG> There's nothing special that your code must do with respect to exceptions. </LI>
+<LI>You throw exceptions yourself. </LI>
+<LI>Some method that you call from the native code can throw exceptions. </LI></UL>
+
+<P>If exception-handling applies to your code (situation 2 or 3), you have 2 choices:</P>
+
+<UL>
+<LI>Hide yourself from the chain:<BR>
+Do <U>not</U> link the a6 register (this makes you invisible to exceptions thrown from methods that you called).<BR>
+If you throw an exception yourself, make sure to present the pc from your caller routine (the address that you'd normally return to with the 'rts' instruction at the end of your native code) as the "initiating address", not an address within your native code. </LI>
+<LI>Become a full-featured element of the chain:<BR>
+Start your code with: </LI></UL>
+
+<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=4 WIDTH=626>
+<TR><TD WIDTH="13%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+<TD WIDTH="13%" VALIGN="MIDDLE">
+<P>link</TD>
+<TD WIDTH="18%" VALIGN="MIDDLE">
+<P>a6,#-xxx</TD>
+<TD WIDTH="56%" VALIGN="MIDDLE">
+<P>allocate a stack frame (xxx = size in bytes)</TD>
+</TR>
+<TR><TD WIDTH="13%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+<TD WIDTH="13%" VALIGN="MIDDLE">
+<P>lea</TD>
+<TD WIDTH="18%" VALIGN="MIDDLE">
+<P>exHand(pc),a0</TD>
+<TD WIDTH="56%" VALIGN="MIDDLE">
+<P>your exception-handler code (see below)</TD>
+</TR>
+<TR><TD WIDTH="13%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+<TD WIDTH="13%" VALIGN="MIDDLE">
+<P>move.l</TD>
+<TD WIDTH="18%" VALIGN="MIDDLE">
+<P>a0,-4(a6)</TD>
+<TD WIDTH="56%" VALIGN="MIDDLE">
+<P>move in place</TD>
+</TR>
+</TABLE>
+<DIR>
+<DIR>
+
+<P>Write an exception-handler (even if you just want to pass the exception to your caller!). Look at the auto-generated 'Mxxx__exceptions:' sections that Jump generates. On entry, the following registers contain useful information: </P></DIR>
+</DIR>
+
+<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=4 WIDTH=620>
+<TR><TD WIDTH="3%" VALIGN="MIDDLE">
+<P>d2</TD>
+<TD WIDTH="97%" VALIGN="MIDDLE">
+<P>your relevant pc within your routine where you threw the exception or where you called the exception-throwing routine</TD>
+</TR>
+<TR><TD WIDTH="3%" VALIGN="MIDDLE">
+<P>d3</TD>
+<TD WIDTH="97%" VALIGN="MIDDLE">
+<P>original pc where exception was thrown (can be in a different routine from a nested call)</TD>
+</TR>
+<TR><TD WIDTH="3%" VALIGN="MIDDLE">
+<P>a2</TD>
+<TD WIDTH="97%" VALIGN="MIDDLE">
+<P>exception instance</TD>
+</TR>
+<TR><TD WIDTH="3%" VALIGN="MIDDLE">
+<P>a0</TD>
+<TD WIDTH="97%" VALIGN="MIDDLE">
+<P>classtable entry for exception instance</TD>
+</TR>
+<TR><TD WIDTH="3%" VALIGN="MIDDLE">
+<P>a6</TD>
+<TD WIDTH="97%" VALIGN="MIDDLE">
+<P>frame pointer of your routine</TD>
+</TR>
+</TABLE>
+<DIR>
+<DIR>
+
+<P>(a7's value is not strictly defined!)<BR>
+If you simply want to pass the exception up to your caller, use code like this:</P></DIR>
+</DIR>
+
+<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=4 WIDTH=627>
+<TR><TD WIDTH="13%" VALIGN="MIDDLE">
+<P>exHand:</TD>
+<TD WIDTH="13%" VALIGN="MIDDLE">
+<P>move.l</TD>
+<TD WIDTH="13%" VALIGN="MIDDLE">
+<P>4(a6),d2</TD>
+<TD WIDTH="61%" VALIGN="MIDDLE">
+<P>your return address, being the exception-initiating pc address for your caller</TD>
+</TR>
+<TR><TD WIDTH="13%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+<TD WIDTH="13%" VALIGN="MIDDLE">
+<P>unlk</TD>
+<TD WIDTH="13%" VALIGN="MIDDLE">
+<P>a6</TD>
+<TD WIDTH="61%" VALIGN="MIDDLE">
+<P>unwind your stack frame</TD>
+</TR>
+<TR><TD WIDTH="13%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+<TD WIDTH="13%" VALIGN="MIDDLE">
+<P>move.l</TD>
+<TD WIDTH="13%" VALIGN="MIDDLE">
+<P>-4(a6),a1</TD>
+<TD WIDTH="61%" VALIGN="MIDDLE">
+<P>your caller's exception handler address</TD>
+</TR>
+<TR><TD WIDTH="13%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+<TD WIDTH="13%" VALIGN="MIDDLE">
+<P>jmp</TD>
+<TD WIDTH="13%" VALIGN="MIDDLE">
+<P>(a1)</TD>
+<TD WIDTH="61%" VALIGN="MIDDLE">
+<P>pass control to caller's exception handler</TD>
+</TR>
+</TABLE>
+<DIR>
+<DIR>
+
+<P>If you want to catch exceptions, you can check d2's value (where did the exception come from?), check the exception object's type (a2 points to the object) and so on. When you find out that you really want to handle this exception, adjust the stack (by setting a7 to the correct offset from a6, you will know the value) and jump to the appropriate place in your routine.</P></DIR>
+</DIR>
+
+<P>Don't forget to test your code thoroughly! Implementing exception-handling is a bit complicated, so mistakes can happen.</P>
+<P><HR></P>
+<ADDRESS>Jump is Copyright &copy; 1996,1997 by Greg Hewgill,<BR>
+Copyright &copy; 2000, 2001by Ralf Kleberhof,</ADDRESS>
+<ADDRESS>and Copyright &copy; 2000-2004 by Peter Dickerson</ADDRESS>
+<P><HR></P>
+<FONT SIZE=2><P>Java and all Java-based trademarks and logos are trademarks or registered trademarks of Sun Microsystems, Inc. in the U.S. and other countries.</FONT> </P></BODY>
+</HTML>

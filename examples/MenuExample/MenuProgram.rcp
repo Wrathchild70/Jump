@@ -1,0 +1,66 @@
+#include "MenuProgram.h"
+
+VERSION "1.0"
+ICON "icon.bmp"
+
+ALERT ID ALERTID_ABOUT
+    DEFAULTBUTTON 0
+    INFORMATION
+    BEGIN
+        TITLE "About Menu Example"
+        MESSAGE "This Menu Example is written by Noli Sicad and Ralf Kleberhoff in Jump 2. Updated by Peter Dickerson to demonstrate Form callbacks."
+        BUTTONS "OK" 
+    END
+
+//..................................................... Menus
+MENU ID MENU1_ID
+    BEGIN
+    PULLDOWN "File"
+        BEGIN
+        MENUITEM "New" ID item1043 "N"
+        MENUITEM "Open" ID mOpen "O"
+        MENUITEM "Save" ID mSave "S"
+        MENUITEM "Save As" ID mSaveAs "A"
+        MENUITEM SEPARATOR
+        MENUITEM "Exit" ID mExit "X"
+        END
+    PULLDOWN "Edit"
+        BEGIN
+        MENUITEM "Undo" ID mUndo "U"
+        MENUITEM "Cut" ID mCut "X"
+        MENUITEM "Copy" ID mCopy "S"
+        MENUITEM "Paste" ID mPaste "P"
+        MENUITEM "Select All" ID mSelectAll "S"
+        MENUITEM SEPARATOR
+        MENUITEM "Keyboard" ID mKeyboard "K"
+        END
+    PULLDOWN "Goto"
+        BEGIN
+        MENUITEM "Goto to Form 2" ID ItemMenuForm2 "G"
+        END
+    PULLDOWN "Help"
+        BEGIN
+        MENUITEM "About" ID ItemAlertAbout "H"
+        END
+    END
+
+//..................................................... Bitmaps
+//..................................................... Forms
+FORM ID FORM1_ID AT (0 0 160 160)
+NOFRAME
+SAVEBEHIND
+USABLE
+MENUID MENU1_ID
+BEGIN
+    TITLE "Menu Example"
+    BUTTON "Goto 2 >" ID BUTTON1_ID AT (110 146 45 12) USABLE LEFTANCHOR FRAME FONT 0
+END
+
+FORM ID FORM2_ID AT (0 0 160 160)
+NOFRAME
+SAVEBEHIND
+USABLE
+BEGIN
+    TITLE "Second Form"
+    BUTTON " < Goto 1" ID BUTTON2_ID AT (2 146 45 12) USABLE LEFTANCHOR FRAME FONT 0
+END

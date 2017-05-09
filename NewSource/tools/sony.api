@@ -1,0 +1,107 @@
+// Sony Clie specific API
+// Copyright P.M.Dickerson
+// 12 Dec 2003  original
+
+java
+  /** value of creator for FtrGet */
+  public static final int sonySysFtrCreator = ((int)'S'<<24)|((int)'o'<<16)|((int)'N'<<8)|(int)'y';
+  public static final int sonySysFtrNumSysInfoP = 1;
+  public static final int sonySysFtrSysInfoLibrHR = 1;
+endjava
+
+//HR
+// standard lib stuff
+palmos 4.0 Sony Clie Specific
+Err	HROpen(UInt16 refNum) = sysLibTrapOpen;
+Err	HRClose(UInt16 refNum) = sysLibTrapClose;
+Err	HRSleep(UInt16 refNum) = sysLibTrapSleep;
+Err	HRWake(UInt16 refNum) = sysLibTrapWake;
+
+Err	HRGetAPIVersion(UInt16 refNum, UIntPtr version) = HRTrapGetAPIVersion;
+
+// HRWin
+void HRWinClipRectangle(UInt16 refNum, RectanglePtr r) = HRTrapWinClipRectangle;
+void HRWinCopyRectangle(UInt16 refNum, WinHandle srcWin, WinHandle dstWin, RectanglePtr srcRect, Coord destX, Coord destY,  ScrOperation mode) = HRTrapWinCopyRectangle;
+WinHandle HRWinCreateBitmapWindow(UInt16 refNum, BitmapPtr bitmap, UIntPtr error) = HRTrapWinCreateBitmapWindow;
+WinHandle HRWinCreateOffscreenWindow(UInt16 refNum, Coord width, Coord height, WindowFormatType format, UIntPtr error) = HRTrapWinCreateOffscreenWindow;
+WinHandle HRWinCreateWindow(UInt16 refNum, RectanglePtr bounds, FrameType frame, Boolean modal, Boolean focusable, UIntPtr error) = HRTrapWinCreateWindow;
+void HRWinDisplayToWindowPt(UInt16 refNum, CoordPtr extentX, CoordPtr extentY) = HRTrapWinDisplayToWindowPt;
+void HRWinDrawBitmap(UInt16 refNum, BitmapPtr bitmap, Coord x, Coord y) = HRTrapWinDrawBitmap;
+void HRWinDrawChar(UInt16 refNum, UInt16 ch, Coord x, Coord y) = HRTrapWinDrawChar;
+void HRWinDrawChars(UInt16 refNum, const CharPtr chars, Int16 len, Coord x, Coord y) = HRTrapWinDrawChars;
+void HRWinDrawGrayLine(UInt16 refNum, Coord x1, Coord y1, Coord x2, Coord y2) = HRTrapWinDrawGrayLine;
+void HRWinDrawGrayRectangleFrame(UInt16 refNum, FrameType frame, RectanglePtr r) = HRTrapWinDrawGrayRectangleFrame;
+void HRWinDrawInvertedChars(UInt16 refNum, const CharPtr chars, Int16 len, Coord x, Coord y) = HRTrapWinDrawInvertedChars;
+void HRWinDrawLine(UInt16 refNum, Coord x1, Coord y1, Coord x2, Coord y2) = HRTrapWinDrawLine;
+void HRWinDrawPixel(UInt16 refNum, Coord x, Coord y) = HRTrapWinDrawPixel;
+void HRWinDrawRectangle(UInt16 refNum, RectanglePtr r, UInt16 cornerDiam) = HRTrapWinDrawRectangle;
+void HRWinDrawRectangleFrame(UInt16 refNum, FrameType frame, RectanglePtr r) = HRTrapWinDrawRectangleFrame;
+void HRWinDrawTruncChars(UInt16 refNum, const CharPtr chars, Int16 len, Coord x, Coord y, Coord maxWidth) = HRTrapWinDrawTruncChars;
+void HRWinEraseChars(UInt16 refNum, const CharPtr chars, Int16 len, Coord x, Coord y) = HRTrapWinEraseChars;
+void HRWinEraseLine(UInt16 refNum, Coord x1, Coord y1, Coord x2, Coord y2) = HRTrapWinEraseLine;
+void HRWinErasePixel(UInt16 refNum, Coord x, Coord y) = HRTrapWinErasePixel;
+void HRWinEraseRectangle(UInt16 refNum, RectanglePtr r, UInt16 cornerDiam) = HRTrapWinEraseRectangle;
+void HRWinEraseRectangleFrame(UInt16 refNum, FrameType frame, RectanglePtr r) = HRTrapWinEraseRectangleFrame;
+void HRWinFillLine(UInt16 refNum, Coord x1, Coord y1, Coord x2, Coord y2) = HRTrapWinFillLine;
+void HRWinFillRectangle(UInt16 refNum, RectanglePtr r, UInt16 cornerDiam) = HRTrapWinFillRectangle;
+void HRWinGetClip(UInt16 refNum, RectanglePtr r) = HRTrapWinGetClip;
+void HRWinGetDisplayExtent(UInt16 refNum, CoordPtr extentX, CoordPtr extentY) = HRTrapWinGetDisplayExtent;
+void HRWinGetFramesRectangle(UInt16 refNum, FrameType frame, RectanglePtr r, RectanglePtr obscuredRect) = HRTrapWinGetFramesRectangle;
+Byte HRWinGetPixel(UInt16 refNum, Coord x, Coord y) = HRTrapWinGetPixel;
+void HRWinGetWindowBounds(UInt16 refNum, RectanglePtr r) = HRTrapWinGetWindowBounds;
+void HRWinGetWindowExtent(UInt16 refNum, CoordPtr extentX, CoordPtr extentY) = HRTrapWinGetWindowExtent;
+void HRWinGetWindowFrameRect(UInt16 refNum, WinHandle winHandle, RectanglePtr r) = HRTrapWinGetWindowFrameRect;
+void HRWinInvertChars(UInt16 refNum, const CharPtr chars, Int16 len, Coord x, Coord y) = HRTrapWinInvertChars;
+void HRWinInvertLine(UInt16 refNum, Coord x1, Coord y1, Coord x2, Coord y2) = HRTrapWinInvertLine;
+void HRWinInvertPixel(UInt16 refNum, Coord x, Coord y) = HRTrapWinInvertPixel;
+void HRWinInvertRectangle(UInt16 refNum, RectanglePtr r, UInt16 cornerDiam) = HRTrapWinInvertRectangle;
+void HRWinInvertRectangleFrame(UInt16 refNum, FrameType frame, RectanglePtr r) = HRTrapWinInvertRectangleFrame;
+void HRWinPaintBitmap(UInt16 refNum, BitmapPtr bitmap, Coord x, Coord y) = HRTrapWinPaintBitmap;
+void HRWinPaintChar(UInt16 refNum, UInt16 ch, Coord x, Coord y) = HRTrapWinPaintChar;
+void HRWinPaintChars(UInt16 refNum, const CharPtr chars, Int16 len, Coord x, Coord y) = HRTrapWinPaintChars;
+void HRWinPaintLine(UInt16 refNum, Coord x1, Coord y1, Coord x2, Coord y2) = HRTrapWinPaintLine;
+// void HRWinPaintLines(UInt16 refNum, UInt16 numLines, WinLineType lines[]) = HRTrapWinPaintLines;
+void HRWinPaintLines(UInt16 refNum, UInt16 numLines, ShortArray lines) = HRTrapWinPaintLines;
+void HRWinPaintPixel(UInt16 refNum, Coord x, Coord y) = HRTrapWinPaintPixel;
+// void HRWinPaintPixels(UInt16 refNum, UInt16 numPoints, PointType pts[]) = HRTrapWinPaintPixels;
+void HRWinPaintPixels(UInt16 refNum, UInt16 numPoints, ShortArray pts) = HRTrapWinPaintPixels;
+void HRWinPaintRectangle(UInt16 refNum, RectanglePtr r, UInt16 cornerDiam) = HRTrapWinPaintRectangle;
+void HRWinPaintRectangleFrame(UInt16 refNum, FrameType frame, RectanglePtr r) = HRTrapWinPaintRectangleFrame;
+void HRWinRestoreBits(UInt16 refNum, WinHandle winHandle, Coord destX, Coord destY) = HRTrapWinRestoreBits;
+WinHandle HRWinSaveBits(UInt16 refNum, RectanglePtr source, UIntPtr error) = HRTrapWinSaveBits;
+Err HRWinScreenMode(UInt16 refNum, byte operation, ULongPtr width, ULongPtr height, ULongPtr depth, BooleanPtr enableColor) = HRTrapWinScreenMode;
+void HRWinScrollRectangle(UInt16 refNum, RectanglePtr r, DirectionType direction, Coord distance, RectanglePtr vacated) = HRTrapWinScrollRectangle;
+void HRWinSetClip(UInt16 refNum, RectanglePtr r) = HRTrapWinSetClip;
+void HRWinSetWindowBounds(UInt16 refNum, WinHandle winHandle, RectanglePtr r) = HRTrapWinSetWindowBounds;
+void HRWinWindowToDisplayPt(UInt16 refNum, CoordPtr extentX, CoordPtr extentY) = HRTrapWinWindowToDisplayPt;
+Err HRWinGetPixelRGB(UInt16 refNum, Coord x, Coord y, ULongPtr rgb) = HRTrapWinGetPixelRGB;
+
+
+// HRBmp
+UInt32 HRBmpBitsSize(UInt16 refNum, BitmapPtr bitmap) = HRTrapBmpBitsSize;
+UInt32 HRBmpSize(UInt16 refNum, BitmapPtr bitmap) = HRTrapBmpSize;
+BitmapPtr HRBmpCreate(UInt16 refNum, Coord width, Coord height, UInt8 depth, ColorTablePtr colortable, UIntPtr error) =  HRTrapBmpCreate;
+
+// HRFnt
+FontID HRFntGetFont(UInt16 refNum) = HRTrapFntGetFont;
+FontID HRFntSetFont(UInt16 refNum, FontID font) = HRTrapFntSetFont;
+FontID HRFontSelect(UInt16 refNum, FontID font) = HRTrapFontSelect;
+Int16  HRFntBaseLine (UInt16 refNum) = HRTrapFntBaseLine;
+Int16  HRFntCharHeight (UInt16 refNum) = HRTrapFntCharHeight;
+Int16  HRFntLineHeight (UInt16 refNum) = HRTrapFntLineHeight;
+Int16  HRFntAverageCharWidth (UInt16 refNum) = HRTrapFntAverageCharWidth;
+Int16  HRFntCharWidth (UInt16 refNum, byte ch) = HRTrapFntCharWidth;
+Int16  HRFntWCharWidth (UInt16 refNum, UInt16 iChar) = HRTrapFntWCharWidth;
+Int16  HRFntCharsWidth (UInt16 refNum, const CharPtr chars, Int16 len) = HRTrapFntCharsWidth;
+Int16  HRFntWidthToOffset (UInt16 refNum, const CharPtr chars, UInt16 length, Int16 pixelWidth, BooleanPtr leadingEdge, IntPtr truncWidth) = HRTrapFntWidthToOffset;
+void   HRFntCharsInWidth (UInt16 refNum, const CharPtr string, IntPtr stringWidth, IntPtr stringLength, BooleanPtr fitWithinWidth) = HRTrapFntCharsInWidth;
+Int16  HRFntDescenderHeight (UInt16 refNum) = HRTrapFntDescenderHeight;
+Int16  HRFntLineWidth (UInt16 refNum, const CharPtr chars, UInt16 length) = HRTrapFntLineWidth;
+UInt16 HRFntWordWrap (UInt16 refNum, const CharPtr chars, UInt16 maxWidth) = HRTrapFntWordWrap;
+void   HRFntWordWrapReverseNLines (UInt16 refNum, const CharPtr chars, UInt16 maxWidth, UIntPtr linesToScroll, UIntPtr scrollPos) = HRTrapFntWordWrapReverseNLines;
+void   HRFntGetScrollValues (UInt16 refNum,  const CharPtr chars, UInt16 width, UInt16 scrollPos, UIntPtr lines, UIntPtr topLine) = HRTrapFntGetScrollValues;
+
+// HRSys
+Err HRSystem(UInt16 refNum, UInt16 operation, ULongPtr param1, ULongPtr param2, ULongPtr param3) = HRTrapSystem;
+
+Err HRGetInfo(UInt16 refNum, UIntPtr ptr1, UIntPtr ptr2) = HRTrapGetInfo;

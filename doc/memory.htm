@@ -1,0 +1,302 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>Jump2 Memory Management</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+
+<table border="0" cellpadding="10">
+    <tr>
+        <td><h1><img src="min-logo.gif" width="128" height="121"></h1>
+        </td>
+        <td><h1>Jump2 Memory Management</h1>
+        <h2>Version 2.0 Beta 6</h2>
+        <p>16-June-2001<br>
+        by Ralf Kleberhoff ( <a href="mailto:kleberhoff@aol.com">kleberhoff@aol.com</a>
+        )</p>
+        </td>
+    </tr>
+</table>
+
+<p><font size="4"><b>WARNING</b></font></p>
+
+<p>Jump2 is still under development. Don't expect a completely
+stable development environment. Jump2 might or might not work as
+expected. Don't blame me if something goes wrong - you have been
+warned...</p>
+
+<hr>
+
+<p>This text describes the memory management used by Jump. </p>
+
+<p>This text is for those interested in the internals of Jump.
+You don't need to know anything described here if you only want
+to write programs with Jump. In fact, you should not write code
+that relies on the memory management mechanisms described here.</p>
+
+<h2><b>Table of Contents</b></h2>
+
+<p><strong>1 </strong><a href="#allocation"><strong>Memory
+allocation</strong></a><strong><br>
+2 </strong><a href="#garbage"><strong>Garbage collection</strong></a></p>
+
+<hr>
+
+<h1><a name="allocation"></a> 1 Memory allocation</h1>
+
+<p>Jump has 4 types of memory chunks, organized in 3 heaps:</p>
+
+<ul>
+    <li>instances (Object Heap)</li>
+    <li>small array data-chunks (RawData Heap)</li>
+    <li>big array data-chunks (RawData Heap)</li>
+    <li>(Huge Model only) proxy objects (Proxy Heap)</li>
+</ul>
+
+<p>Instances and small array data-chunks are allocated from
+bigger blocks (currently 4 KByte), big array data-chunks each get
+their own blocks. All chunks are non-movable, and I use the
+absolute pointers as object references.</p>
+
+<p>The most important memory management structure is the block.</p>
+
+<h2>Memory management data structures</h2>
+
+<p>These are the data structures used in Jump's memory
+management, in bottom-up order.</p>
+
+<h3>Chunk </h3>
+
+<table border="3">
+    <tr>
+        <td align="right"><strong>Offset</strong></td>
+        <td align="right"><strong>Size</strong></td>
+        <td><strong>Content</strong></td>
+    </tr>
+    <tr>
+        <td align="right">0</td>
+        <td align="right">2</td>
+        <td>Bytes consumed by this chunk. This is a multiple of 8
+        and includes this &quot;byte count&quot; word.</td>
+    </tr>
+    <tr>
+        <td align="right">2</td>
+        <td align="right">x</td>
+        <td>User data</td>
+    </tr>
+</table>
+
+<p>A chunk can be free or used (i.e. free space is also encoded
+using the &quot;chunk&quot; data structure). Being used is not
+encoded in the chunk's data structure, only in the block's
+allocation array. Chunks have variable length (multiple of 8
+bytes). Within a block, a chunk is immediately followed by the
+next chunk.</p>
+
+<h3>Block</h3>
+
+<table border="3">
+    <tr>
+        <td align="right" valign="top"><strong>Offset</strong></td>
+        <td align="right" valign="top"><strong>Size</strong></td>
+        <td valign="top"><strong>Content</strong></td>
+    </tr>
+    <tr>
+        <td align="right">-8</td>
+        <td align="right">4</td>
+        <td>(only for Huge Model) record's unique ID of this
+        block.</td>
+    </tr>
+    <tr>
+        <td align="right">-4</td>
+        <td align="right">4</td>
+        <td>(only for Huge Model) record's handle of this block.</td>
+    </tr>
+    <tr>
+        <td align="right" valign="top">0</td>
+        <td align="right" valign="top">4</td>
+        <td valign="top">Pointer to next block of this heap,
+        forming a linked list of blocks.</td>
+    </tr>
+    <tr>
+        <td align="right" valign="top">4</td>
+        <td align="right" valign="top">64</td>
+        <td valign="top">Allocation bit-array (one bit per 8 byte
+        of memory).</td>
+    </tr>
+    <tr>
+        <td align="right" valign="top">68</td>
+        <td align="right" valign="top">4096</td>
+        <td valign="top">Storage, allocated in units of 8 byte.
+        This area contains chunks. </td>
+    </tr>
+</table>
+
+<p>In the allocation array, there's one bit for every 8-byte unit
+of storage. Only those bits are relevant that correspond to a
+chunk beginning. Those corresponding to a position in the middle
+of a chunk are ignored. A &quot;1&quot; bit means that the
+corresponding chunk is in use.</p>
+
+<p>The last chunk is normally a single empty chunk occupying all
+space left in the block. Allocating a new chunk normally means
+splitting this empty chunk into a first part (for the new chunk)
+and a second part, now forming the empty rest.</p>
+
+<h3>Heap</h3>
+
+<table border="3">
+    <tr>
+        <td align="right" valign="top"><strong>Offset</strong></td>
+        <td align="right" valign="top"><strong>Size</strong></td>
+        <td valign="top"><strong>Content</strong></td>
+    </tr>
+    <tr>
+        <td align="right" valign="top">0</td>
+        <td align="right" valign="top">4</td>
+        <td valign="top">Pointer to first block of this heap,
+        starting a linked list of blocks.</td>
+    </tr>
+    <tr>
+        <td align="right" valign="top">4</td>
+        <td align="right" valign="top">4</td>
+        <td valign="top">Pointer to current block (the block for
+        the next allocation).</td>
+    </tr>
+    <tr>
+        <td align="right" valign="top">8</td>
+        <td align="right" valign="top">2</td>
+        <td valign="top">Current offset within current block
+        where to start searching for the next free chunk.</td>
+    </tr>
+    <tr>
+        <td align="right" valign="top">10</td>
+        <td align="right" valign="top">4</td>
+        <td valign="top">Lowest possible address of a chunk in
+        this heap.</td>
+    </tr>
+    <tr>
+        <td align="right" valign="top">14</td>
+        <td align="right" valign="top">4</td>
+        <td valign="top">Highest possible address of a chunk in
+        this heap.</td>
+    </tr>
+    <tr>
+        <td align="right" valign="top">18</td>
+        <td align="right" valign="top">2</td>
+        <td valign="top">Memory space where heap is allocated
+        (1=storage memory, 0=dynamic memory). This is only used
+        in the Huge memory model.</td>
+    </tr>
+</table>
+
+<h2>Allocation process</h2>
+
+<p>Memory allocation is always requested for a specific heap. The
+steps for allocating a new chunkfrom a heap are as follows:</p>
+
+<ol>
+    <li>Look for a free chunk, big enough for the request,
+        starting at the current offset in the current block. Exit
+        if found.</li>
+    <li>Start a garbage collection, then look again for a free
+        chunk big enough for the request. Exit if found.</li>
+    <li>Add a new block to the heap, then allocate the chunk from
+        this new block.</li>
+</ol>
+
+<p>If an empty chunk is bigger than the size requested, it is
+split into parts. The first part is used for the request, the
+second part stays unused.</p>
+
+<p>If a chunk is requested that exceeds the block size, it is
+allocated in its own block (of course, this block is allocated
+big enough to hold the requested chunk). </p>
+
+<p>Allocation of blocks is normally done by means of the
+MemPtrNew systrap. Only in the Huge Model, for the Object and the
+RawData Heaps, DmNewRecord is used instead.</p>
+
+<hr>
+
+<h1><a name="garbage"></a>2 Garbage collection</h1>
+
+<p>Jump's garbage collector (GC) can be classified as a
+conservative mark-and-sweep collector. </p>
+
+<p>Jump's GC doesn't know the layout of the fields of a class or
+of the stack entries. So it assumes that any 4-byte pattern that
+reads like an address of an object chunk might be a valid Java
+reference, and should cause this chunk to be marked &quot;in
+use&quot;. This will probably include some &quot;false
+pointers&quot;, but the only effect will be that some unused
+object might stay in memory a little bit longer than necessary.</p>
+
+<p>Valid references can be found in the following sources:</p>
+
+<ul>
+    <li>In the registers.</li>
+    <li>On the stack (Jump uses only the 68K cpu's stack). A
+        valid reference can begin on any 16-bit word boundary, as
+        16-bit stack entries are allowed with the 68K cpu.</li>
+    <li>In static fields of reference type.</li>
+    <li>In instance fields of instances found to be &quot;in
+        use&quot;. A valid reference can begin on any 16-bit word
+        boundary, as fields are only word-aligned, not
+        double-word-aligned.</li>
+    <li>In the data portion of &quot;in-use&quot; reference-type
+        arrays. A valid reference can only begin on a 32-bit
+        double-word boundary (relative to the data portion's
+        start).</li>
+</ul>
+
+<p>The GC starts be removing all &quot;in use&quot; bits from the
+allocation arrays of the blocks. </p>
+
+<p>Iterating over all the sources mentioned above, the GC then
+marks all validly referenced objects. For every potential
+reference, it does the following steps:</p>
+
+<ol>
+    <li>Check against the bounds in the Object Heap structure
+        (valid references always go only into the Object Heap).
+        If the pointer lies below the lowest chunk address or
+        above the highest chunk address, it can't be valid, and
+        it's ignored.</li>
+    <li>Iterate through the linked list of blocks. If the pointer
+        falls into the storage area of a block, assume it is
+        valid.</li>
+    <li>Set the corresponding &quot;in use&quot; bit of the
+        allocation array. There's no check for pointers going
+        into the middle of a chunk in this step. The bit is set
+        anyway, but it will be ignored if it doesn't correspond
+        to a chunk's beginning.</li>
+</ol>
+
+<p>The new &quot;in use&quot; bits can add new sources to the
+root set described above. So this process is repeated until no
+new &quot;in use&quot; bit arises in an iteration.</p>
+
+<p>Then the GC sweeps over the heap blocks. It combines adjacent
+free chunks to bigger chunks to avoid fragmentation. If a block
+the consists of only one free chunk, the whole block is removed
+from the heap and given back to the OS.</p>
+
+<hr>
+
+<address>
+    Jump is Copyright © 1996,1997 by Greg Hewgill<br>
+    and Copyright © 2000,2001 by Ralf Kleberhoff 
+</address>
+
+<hr>
+
+<p><font size="2">Java and all Java-based trademarks and logos
+are trademarks or registered trademarks of Sun Microsystems, Inc.
+in the U.S. and other countries.</font> </p>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<META NAME="Generator" CONTENT="Microsoft Word 97">
+<TITLE>Jump2 MkApi Manual</TITLE>
+<META NAME="Template" CONTENT="D:\Program Files\Microsoft Office\Office\html.dot">
+</HEAD>
+<BODY TEXT="#000000" LINK="#0000ff" VLINK="#800080" BGCOLOR="#ffffff">
+
+<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=10 WIDTH=620>
+<TR><TD WIDTH="21%" VALIGN="MIDDLE">
+<H1><IMG SRC="min-logo.gif" WIDTH=128 HEIGHT=121></H1></TD>
+<TD WIDTH="79%" VALIGN="MIDDLE">
+<H1>Jump2 UnWarp Manual</H1>
+<H2>Version 2.2</H2>
+<P>10-Feb-2004 by Peter M Dickerson</TD>
+</TR>
+</TABLE>
+
+<P>Watch the newsgroup <A HREF="news://news.superwaba.net/pilot.programmer.jump">pilot.programmer.jump</A> on the server news.superwaba.net.</P>
+<P>The current version can be found at <A HREF="http://sourceforge.net/projects/jump">http://sourceforge.net/projects/jump</A></P>
+<P><HR></P>
+<H3>LICENSE</H3>
+<P><A HREF="jump2.htm">Jump2</A> is distributed under the <A HREF="Copying.txt">GNU GENERAL PUBLIC LICENSE (version 2)</A>, </P>
+<P>Copyright &copy; 2003-2004 by Peter M Dickerson</P>
+<P>This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.</P>
+<P>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</P>
+<P><HR></P>
+<H1>What is UnWarp?</H1>
+<P>UnWarp is a utility, included with Jump, which can extract records from a Palm OS <CODE>pdb</CODE> database that has been built using the SuperWaba Warp facility. The point of this is to encourage the development of automated ways of converting SuperWaba based application to Jump via some 'SuperWabaJump'. In particular UnWarp is useful for extracting bitmaps and sound data from SuperWaba in a form that can be used as resources by Pila, or extracting bitmaps as files that can be processed by PilRC. To aid this process UnWarp outputs a partial script for inclusion with Pila or PilRC.</P>
+<P>This may leave you wondering what this is all about. An example is probably most useful. Suppose we have a SuperWaba application called <CODE>GuiBuilder</CODE>, which has two bitmaps embedded in it (there is a sample application in the SuperWaba SDK of this name). Then we could extract these bitmaps to resource file (<CODE>*.bin</CODE>) by the command</P>
+<PRE>Java <I>&lt;classpath&gt;</I> UnWarp <I>&lt;path-to-application&gt;</I>/GuiBuilder.pdb "pre*.bmp" &gt;&gt;GuiBuilder.res</PRE>
+<P>This creates two files in the current directory <CODE>Wrp2065f.bin</CODE> and <CODE>Wrp206af.bin</CODE>. These contain the resources of two bitmap files in Warp format. In addition two lines are appended to the <CODE>GuiBuilder.res</CODE> file created by Jump and used by <CODE>Pila</CODE>. These two lines pull the two resources into the <CODE>prc</CODE> file that is being created.</P>
+<PRE>   res   'Wrp2',   1631,   "Wrp2065f.bin" ; preview.bmp res
+   'Wrp2',   1711, "Wrp206af.bin" ; previewBig.bmp</PRE>
+<P>This puts the bitmaps into the <CODE>prc</CODE> file in a format that would be expected by SuperWaba. In other words the SuperWabaJump support code would be expected to be able to find and process bitmaps in this format.</P>
+<P>An alternative approach is for the bitmaps in a SuperWaba <CODE>pdb</CODE> file to extracted to a form that can be used by <CODE>PilRC</CODE> to create bitmap resources in the Palm OS standard format. This approach would require that the SuperWabaJump support code can find and process bitmaps as native Palm OS resources.</P>
+<PRE>Java <I>classpath</I> UnWarp <U>-b</U> <I>path-to-application</I>/GuiBuilder.pdb "pre*.bmp" &gt;&gt;GuiBuilder.rcp</PRE>
+<P>This creates two files in the current directory <CODE>preview.bmp</CODE> and <CODE>previewBig.bmp</CODE>. In addition two lines are added to the <CODE>GuiBuilder.rcp</CODE> file.</P>
+<PRE>   BITMAPCOLOR ID 1631 "preview.bmp" NOCOLORTABLE
+   BITMAPCOLOR ID 1711 "previewBig.bmp" NOCOLORTABLE</PRE>
+<P>This will put the bitmaps into the prc file in a format that is suitable for Palm OS native bitmap handling. It may be necessary to convert the format of the bitmaps manually because SuperWaba and <CODE>PilRC</CODE> support different, but overlapping, subsets of the <CODE>bmp</CODE> file format. This is useful for a SuperWabaJump facility that can handle bitmaps in native format (and so gain native processing speed).</P>
+<P>Note that the name of a file to extract can contain one <I>wildcard</I> star character. If a wildcard is used then it is advisable to enclose the name in double quotes to step file names from being expanded at the command line; otherwise if the name matches a file in the current directory some odd results can result. Also the file name can be preceded by -x, in which case the files are excluded.</P>
+<P>When using the -b method the name of the file is not embedded in the <CODE>prc</CODE> file because Palm OS resources only have ID numbers. A hashing approach is used to convert from the file name to a resource ID. UnWarp will throw an exception if there is a hash collision. The solution to this problem is to change the name of one or more bitmaps <I>in the SuperWaba application</I>.</P>
+<P>The Warp-record method (no -b) also uses a hashing approach but in this case it is only to accelerate the resource look-up. If there is a hash collision then the Warp record is stored using the next available resource ID. UnWarp will warn if there are excessive hash collisions. It is intended that the SuperWabaJump support should hash the name to find a first ID to try, verifying the embedded file name, and moving on to the next ID value if not found. Eventually giving up if the ID is not present. A warp record uses type '<CODE>Wrp2'</CODE>.</P>
+<P>Using the command line option <CODE>-l</CODE> can be used to list all the Warp records in a SuperWaba <CODE>pdb</CODE> file.</P>
+<B><I><FONT FACE="Arial"><P>Restrictions</P>
+</B></I></FONT><P>It is not possible extract class files or <CODE>pdb</CODE> files from the <CODE>pdb</CODE> file. Class files are processed directly by Jump without the need for UnWarp. However, the list option will display such files (Warp records).</P>
+<P><HR></P>
+<ADDRESS>Jump is Copyright &copy; 1996,1997 by <A HREF="mailto:greg@hewgill.com">Greg Hewgill &lt;greg@hewgill.com&gt;</A><BR>
+and Copyright &copy; 2000 by <A HREF="mailto:kleberhoff@aol.com">Ralf Kleberhoff &lt;kleberhoff@aol.com&gt;</A><BR>
+and Copyright &copy; 2001-2004 by <A HREF="mailto:peter.dickerson@ukonline.co.uk">Peter M Dickerson &lt;peter.dickerson@ukonline.co.uk&gt;</A></ADDRESS>
+<P><HR></P>
+<FONT SIZE=2><P>Java and all Java-based trademarks and logos are trademarks or registered trademarks of Sun Microsystems, Inc. in the U.S. and other countries.</P></FONT></BODY>
+</HTML>

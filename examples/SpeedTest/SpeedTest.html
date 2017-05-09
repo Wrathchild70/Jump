@@ -1,0 +1,39 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<META NAME="Generator" CONTENT="Microsoft Word 97">
+<META NAME="Template" CONTENT="D:\Program Files\Microsoft Office\Office\html.dot">
+</HEAD>
+<BODY LINK="#0000ff" VLINK="#800080">
+
+<H1 ALIGN="CENTER">SpeedTest</H1>
+<P>The SpeedTest program requires WabaJump (tested with version <B>0.6.1</B>). SpeedTest is used to test compiler optimizations and behavior. SpeedTest can be built for WabaJump using the sw3<CODE>make.bat</CODE> batch file for SuperWaba <B>3.3</B>. It can also use the SuperWaba applet mode via the <CODE>rundemo.bat</CODE> batch file. Note that SuperWaba fails three of the exception tests by default, because SW does not support Object.clone() - namely the not cloneable test, the clone class test and the clone array test. Also part of the gc object testing fails on SW but not on PC.</P>
+<P>SpeedTest outputs its results on the screen and via the SuperWaba Debug Console for SuperWaba, or on-screen and via the a MemoPad memo for WabaJump. To use the memo facility in Jump it is necessary to create a memo with the title</P>
+<CODE><P>Jump log</P>
+</CODE><P>The GC test button requires about 1.8 Mbytes of free memory to run (WabaJump) or 4 MB (SuperWaba).</P>
+<P>Timing info is a bit jumbled at the moment. If a test is reported in milliseconds then that is for the complete test, otherwise if it is reported in microseconds then it is for one loop of the test with the loop overhead removed.</P>
+<P>Some tests produce ticks or crosses, others do not. Those that produce ticks and crosses have simple consistency checks to verify that the answers from the tests are as expected. Therefore no crosses are expected - but the tests are useful to verify nothing has been broken. Those without either do not have consistency checks because there is nothing to check or the original did not provide for checking.</P>
+<P>Bench, WabaMark and Compress are imported from SuperWaba and modified to suit the test framework and to fix some problems that were found.</P>
+<H2>[int]</H2>
+<P>Test the basic integer operations and conversions.</P>
+<H2>[long]</H2>
+<P>Test the basic long operations and conversions.</P>
+<H2>[float]</H2>
+<P>Tests the basic float operations and conversions.</P>
+<H2>[double]</H2>
+<P>Tests the basic double and operations and conversions.</P>
+<H2>[trans]</H2>
+<P>Tests some transcendental operations such as sqrt() and sin().</P>
+<H2>[basic]</H2>
+<P>Performs some basic tests on more complex expressions, recursive method calls, virtual calls etc. There are three screens of results. Press the basic button a second or third time for the additional screens.</P>
+<H2>[comp]</H2>
+<P>Tests the performance of the string compression routines supplied with SuperWaba that originated with Valentim Batista<FONT FACE="DOSLike" COLOR="#008000">.</P>
+</FONT><H2>[bench]</H2>
+<P>Runs the non-graphic tests from the Bench sample program from SuperWaba. This allows comparison with the performance of SuperWaba.</P>
+<H2>[wm]</H2>
+<P>Runs the WabaMark computational tests from Superwaba. These are ports of numeric benchmark programs.</P>
+<H2>[gc]</H2>
+<P>This tests the performance of the Java heap both for allocation and for garbage collection. These tests need an essentially empty 2 Mbyte device to run in WabaJump. For SuperWaba much more memory is needed (somewhere around 4 Mbytes). This test requires that SpeedTest be built with the huge memory model and the new heap (to complete in a reasonable time) which is how make.bat builds them. You can also build the Jump prc file additional options on the make command line. Using -anc will make the program as small and as fast as possible. This shows the performance benefits from the (so-called) unsafe optimizations which turn off array bounds checking, null-pointer checking and removes class-name data. However, class names are required for some of the tests - forName, newInstance etc.</P>
+<H2>&nbsp;[String]</H2>
+<P>Performs some basic tests on String data. Currently a test of String.lastIndexOf(String) has been disabled because it is not available in SW. There are three screens of results. Press the String button a second and third time for the additional screens.</P></BODY>
+</HTML>

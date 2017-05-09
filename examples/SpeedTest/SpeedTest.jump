@@ -1,0 +1,6 @@
+check-null= no
+check-bounds= no
+check-stack= no
+early-init= waba/sys/NativeMethods waba/fx/NativeMethods waba/io/NativeMethods waba/ui/NativeMethods
+instances=
+

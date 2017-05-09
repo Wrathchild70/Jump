@@ -1,0 +1,1089 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<META NAME="Generator" CONTENT="Microsoft Word 97">
+<TITLE>Jump2 User's Manual</TITLE>
+<META NAME="Template" CONTENT="D:\Program Files\Microsoft Office\Office\html.dot">
+</HEAD>
+<BODY TEXT="#000000" LINK="#0000ff" VLINK="#800080" BGCOLOR="#ffffff">
+
+<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=10 WIDTH=710>
+<TR><TD WIDTH="18%" VALIGN="MIDDLE">
+<H1><IMG SRC="min-logo.gif" WIDTH=128 HEIGHT=121></H1></TD>
+<TD WIDTH="82%" VALIGN="MIDDLE">
+<H1>Jump2 User's Manual</H1>
+<H2>Version 2.2.1</H2>
+<P>03-July-2001 by Ralf Kleberhoff ( <A HREF="mailto:kleberhoff@aol.com">kleberhoff@aol.com</A> )</P>
+<P>12-February-2004 by Peter Dickerson ( <A HREF="mailto:peter.dickerson@ukonline.co.uk">peter.dickerson@ukonline.co.uk</A> )</TD>
+</TR>
+</TABLE>
+
+<P>Watch the newsgroup <A HREF="news://news.superwaba.net/pilot.programmer.jump">pilot.programmer.jump</A> on the server news.superwaba.net.</P>
+<P>The current version can be found at <A HREF="http://sourceforge.net/projects/jump">http://sourceforge.net/projects/jump</A></P>
+<H3>Additional documentation</H3>
+
+<UL>
+<LI>Note that the list of changes can be found <A HREF="change-log.htm">here</A>. </LI>
+<LI>For experienced users, there's a tool to extend the palmos.Palm class. It's described briefly in <A HREF="mkapi.htm">mkapi.htm</A>. </LI>
+<LI>For those interested in developing 'SuperWabaJump' support, there is a utility for extracting resources from applications built with SuperWaba's Warp. See <A HREF="unwarp.htm">unwarp.htm</A> </LI>
+<LI>If you know 68K assembly, you can write native methods. Be sure to follow the guidelines from <A HREF="native.htm">native.htm</A>. </LI>
+<LI>If you are interested in the internals of Jump's memory management, you'll find some information in <A HREF="memory.htm">memory.htm</A>. </LI></UL>
+
+<P><HR></P>
+<H3>LICENSE</H3>
+<P>Jump2 is distributed under the <A HREF="Copying.txt">GNU GENERAL PUBLIC LICENSE (version 2)</A>, </P>
+<P>Copyright &copy; 1996/97 by Greg Hewgill<BR>
+Copyright &copy; 2000,2001 by Ralf Kleberhoff<BR>
+Copyright &copy; 2001-2004 by Peter Dickerson</P>
+<P>This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.</P>
+<P>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</P>
+<H4>Clarification to the GPL as used with Jump:</H4>
+<P>(I can only speak for myself and my intellectual property rights regarding Jump.)</P>
+<P>If you modify Jump or use parts of Jump (e.g. the classfile analyzer or the code generator) in another context, the result is covered by the GPL. In general, you're forced to make the whole resulting program GPL-free software. No discussion.</P>
+<P>But if you write a program (let's call it "Calculator") using Jump as a compiler, the resulting program "Calculator" in its asm and prc form is not bound by the GPL. You are even free to make it a proprietary program (although I wouldn't like it). If you make money with your program, please read the section on "Donations" below.</P>
+<P>The GPL uses the term "a work based on the Program" ("... You may modify your copy or copies of the Program or any portion of it, thus forming a work based on the Program ..."). Of course, the compiled form of your "Calculator" program contains parts of the Jump libraries. But in my opinion, this does not make your compiled program "a work based on Jump" (you did not "... modify your copy ..."). </P>
+<H4>Donations:</H4>
+<P>If Jump helps you to make money, send it all to me (No! Don't do that! I'm only joking!). But please ask yourself:</P>
+
+<UL>
+<LI>How much of this money do I owe to the existence of Jump? </LI></UL>
+
+<P>Then I ask you to donate this amount of money to the charity organization "Freundeskreis Cuzco" that I'm a member of. I'll be happy to tell you contact information and account number on an individual basis. Or you can donate money to some other organization that you like and tell me so. </P>
+<P><HR></P>
+<B><FONT SIZE=4><P>WARNING</P>
+</B></FONT><P>Jump2 is still under development. Don't expect a completely stable development environment. Jump2 might or might not work as expected. Don't blame me if something goes wrong - you have been warned... But tell me if something goes wrong, and I'll try to fix it.</P>
+<P><HR></P>
+<H2>Table of Contents</H2>
+<B><P>1 </B><A HREF="#jump"><B>Jump</B></A><BR>
+&nbsp;1.1 <A HREF="#whatis">What is Jump?</A><BR>
+&nbsp;1.2 <A HREF="#features">Jump Features</A><BR>
+&nbsp;1.3 <A HREF="#package">The Jump Package</A><BR>
+&nbsp;1.4 <A HREF="#requirements">Prerequisites</A><BR>
+&nbsp;1.5 <A HREF="#installation">Installation</A><BR>
+&nbsp;1.6 <A HREF="#limitations">Limitations</A></P>
+<B><P>2 </B><A HREF="#using"><B>Using Jump</B></A><BR>
+&nbsp;2.1 <A HREF="#requirements">Program Requirements</A><BR>
+&nbsp;2.2 <A HREF="#running">Running Jump</A><BR>
+&nbsp;2.3 <A HREF="#options">Options</A></P>
+<B><P>3 </B><A HREF="#technical"><B>Technical Information</B></A><BR>
+&nbsp;3.1 <A HREF="#native">Native Code Interface</A><BR>
+&nbsp;3.2 <A HREF="#optimize">Optimizations</A><BR>
+&nbsp;3.3 <A HREF="#miscellaneous">Miscellaneous</A></P>
+<P><A HREF="#appendices"><B>Appendices</B></A><BR>
+&nbsp;A <A HREF="#future">Future Enhancements</A><BR>
+&nbsp;B <A HREF="#thanks">Thanks to...</A></P>
+<P><HR></P>
+<H1><A NAME="jump"></A>1 Jump</H1>
+<H2><A NAME="whatis"></A>1.1 What is Jump?</H2>
+<P>Jump is a program that allows developers to write <A HREF="http://www.javasoft.com/">Java<SUP>TM</SUP></A> code for the Palm OS based handheld devices from <A HREF="http://www.palm.com/">Palm</A> and others. This has nothing to do with the Internet, HTTP, or the World Wide Web, and in particular will not allow you to run or write Java "applets". It does allow you to use a well-designed, easy to learn language to write applications for the Pilot.</P>
+<P>Jump works by reading the .class files produced by a Java compiler, creating 68000 assembly language .asm files as output. The .asm files are then assembled by Pila (the Pilot Assembler) to produce a .prc file which can be loaded directly into the Pilot. Jump is essentially the "back end" of a compiler (a Java source-to-bytecode compiler is the "front end").</P>
+<P>The .prc files created by Jump are self-contained and do not require any Java runtime support to be present on the Pilot.</P>
+<H2><A NAME="features"></A>1.2 Jump Features</H2>
+<P>Jump allows you to select one of 3 memory models:</P>
+
+<UL>
+<LI>'Small' is limited to 32 KByte of code. This is the default, and it is enough for many small applications. </LI>
+<LI>'Large' is unlimited in code size. Bigger applications need that. The resulting code is longer and runs slower by a few percent when compared to the 'small' model. </LI>
+<LI>'Huge' is unlimited in code size and in data size. THIS IS POTENTIALLY DANGEROUS. Jump uses the data-storage memory for the heap, switching off the normal write-protection. SO BUGS CAN DESTROY ALL YOUR DATA. I can't guarantee that Jump is bug-free in this respect. Please backup your device before testing a huge-model application on a real device. </LI></UL>
+
+<P>So, when your application grows, you can just switch to the 'large' or 'huge' model. No need to change your source code.</P>
+<H2><A NAME="package"></A>1.3 The Jump Package</H2>
+<P>The Jump package includes the following files (I only mention the important ones):</P>
+<TABLE BORDER CELLSPACING=1 WIDTH=620>
+<TR><TD WIDTH="17%" VALIGN="MIDDLE">
+<P>jump.jar</TD>
+<TD WIDTH="83%" VALIGN="MIDDLE">
+<P>the Java classes that make up the Jump program</TD>
+</TR>
+<TR><TD WIDTH="17%" VALIGN="MIDDLE">
+<P>define.asm</TD>
+<TD WIDTH="83%" VALIGN="MIDDLE">
+<P>constants used by the native (68K assembly) routines</TD>
+</TR>
+<TR><TD WIDTH="17%" VALIGN="MIDDLE">
+<P>kernel.asm</TD>
+<TD WIDTH="83%" VALIGN="MIDDLE">
+<P>68K assembly routines always included into Jump's output</TD>
+</TR>
+<TR><TD WIDTH="17%" VALIGN="MIDDLE">
+<P>native-java.asm</TD>
+<TD WIDTH="83%" VALIGN="MIDDLE">
+<P>some methods declared "native" in the Java class library, implemented in 68K assembly for Jump.</TD>
+</TR>
+<TR><TD WIDTH="17%" VALIGN="MIDDLE">
+<P>native-opcodes.asm</TD>
+<TD WIDTH="83%" VALIGN="MIDDLE">
+<P>assembly routines implementing some complex JVM opcodes</TD>
+</TR>
+<TR><TD WIDTH="17%" VALIGN="MIDDLE">
+<P>native-palmos.asm</TD>
+<TD WIDTH="83%" VALIGN="MIDDLE">
+<P>assembly routines (native methods of class palmos.Palm) interfacing Jump to the PalmOS operating system</TD>
+</TR>
+<TR><TD WIDTH="17%" VALIGN="MIDDLE">
+<P>native-Character.asm</TD>
+<TD WIDTH="83%" VALIGN="MIDDLE">
+<P>assembly routines overriding some methods of the java.lang.Character class with more compact ones.</TD>
+</TR>
+</TABLE>
+
+<P>The Jump package also includes the following directories (again, I only mention the important ones):</P>
+<TABLE BORDER CELLSPACING=1 WIDTH=620>
+<TR><TD WIDTH="14%" VALIGN="MIDDLE">
+<P>NewSource</TD>
+<TD WIDTH="86%" VALIGN="MIDDLE">
+<P>the Java source files that make up the Jump program</TD>
+</TR>
+<TR><TD WIDTH="14%" VALIGN="MIDDLE">
+<P>javadocs</TD>
+<TD WIDTH="86%" VALIGN="MIDDLE">
+<P>the auto-generated documentation of the Jump source files</TD>
+</TR>
+<TR><TD WIDTH="14%" VALIGN="MIDDLE">
+<P>doc</TD>
+<TD WIDTH="86%" VALIGN="MIDDLE">
+<P>a few HTML pages describing Jump (includes this page)</TD>
+</TR>
+<TR><TD WIDTH="14%" VALIGN="MIDDLE">
+<P>jar</TD>
+<TD WIDTH="86%" VALIGN="MIDDLE">
+<P>the jarfile of the Jump program plus a batch-file </TD>
+</TR>
+<TR><TD WIDTH="14%" VALIGN="MIDDLE">
+<P>examples</TD>
+<TD WIDTH="86%" VALIGN="MIDDLE">
+<P>some example programs for Jump</TD>
+</TR>
+<TR><TD WIDTH="14%" VALIGN="MIDDLE">
+<P>tools</TD>
+<TD WIDTH="86%" VALIGN="MIDDLE">
+<P>the PalmOS API generator</TD>
+</TR>
+</TABLE>
+
+<H2><A NAME="prerequisites"></A>1.4 Prerequisites</H2>
+<P>Jump requires the following software: </P>
+
+<UL>
+<LI>A correctly installed Java VM. Jump itself is written in Java and needs a VM to run. </LI>
+<LI>A Java compiler. I have used <A HREF="http://www.javasoft.com/">Sun's JDK</A> version 1.2. Version 1.3 and 1.4 also work, a 1.1 version won't work for Jump. </LI>
+<LI>The Pilot Assembler <A HREF="http://mklasson.cjb.net/pilot.php">Pila</A> version 1.0 beta 3 fluff 7. Pila is bundled in the ASDK. Jump only requires the Pila excutable file. </LI>
+<LI>Pilrc (the Pilot Resource Compiler) is not strictly required but makes resource creation easier. The latest version is found at Aaron Ardiri's site <A HREF="http://www.ardiri.com/">www.ardiri.com</A>. I recommend using Aaron's version, mainly because it has the -R command line switch that produces a Jump-compatible .res file (listing the file names of the binary resource files to be included). </LI></UL>
+
+<H2><A NAME="installation"></A>1.5 Installation</H2>
+<OL>
+
+<LI>Create a directory, for example c:\jump. </LI>
+<LI>Extract the contents of the Jump distribution archive into this directory. Be sure to use the stored directory names so that each sample program ends up in its own directory. </LI>
+<LI>Modify your Java CLASSPATH environment variable to include the jar file from the c:\jump\jar directory plus the directory where you have your program. You can do this with a command such as </LI>
+<PRE>set CLASSPATH=c:\jump\jar\jump.jar;.</PRE>
+<P>See your Java tools documentation if you need more information about the CLASSPATH variable.</P>
+<LI>Add the PILAINC environment variable to point to the jar directory, c:\jump\jar directory, where jump.inc and startup.inc are installed. You can do this with a command such as </LI></OL>
+<DIR>
+<DIR>
+
+<PRE>set PILAINC=c:\jump\jar</PRE></DIR>
+</DIR>
+
+<P>Once the files are properly installed, you should run through compiling one of the sample programs to make sure everything works. The sample programs come with batch files that build the application. The batch files use the JUMPCLASSPATH variable rather than CLASSPATH. This makes it easier to use Java for things unrelated to Jump. Look at the make.bat files for details.</P>
+<P>Select the sample program to try. I'll use Hello for this example. The make.bat batch file performs the same sequence.</P>
+<OL>
+
+<LI>Open a Command Prompt (MS-DOS) window, and change to the Hello subdirectory. </LI>
+<LI>Compile the Hello.java program using your Java compiler (javac for the Sun JDK). This should create the Hello.class file. Example: <BR>
+<CODE>javac Hello.java</LI>
+</CODE><LI>Use Pilrc (Aaron's version) to translate the Hello.rcp file. This should create the *.bin binary resources plus a Hello.res file naming all the individual resource files. Example: <BR>
+<CODE>pilrc -R Hello.res Hello.rcp</LI>
+</CODE><LI>Run Jump to post-compile the Hello.class file into a Hello.asm file. Example:<BR>
+java Jump Hello<BR>
+<STRONG>It's important to write 'Jump' with a capital J. With Java, case always matters.</LI>
+</STRONG><LI>Run Pila to assemble the Hello.asm file (together with the *.bin resource files, referenced from the Hello.res file) into the Palm binary Hello.prc. Example:<BR>
+<CODE>Pila Hello.asm</LI></OL>
+
+</CODE><P>If everything goes well, you should now have a Hello.prc file that is ready to load onto your Palm (or Palm Emulator). If there is a problem, check the following items:</P>
+
+<UL>
+<LI>If Jump complains about native functions, make sure that the native-*.asm files are present and are in the same directory as Jump.properties. </LI>
+<LI>There are probably many more sources of problems, I'm sure you'll find a lot of them... </LI></UL>
+
+<P>If you want to write your own program, you need to write the following files (replace &lt;project&gt; with the name of your project):</P>
+<OL>
+
+<LI>Write the Java program sources.</LI>
+<LI>Write a &lt;<I>project</I>&gt;.rcp resource description file for Pilrc.</LI>
+<LI>Write a &lt;<I>project</I>&gt;.jump file. As a minimum this file contain the name of the application and the application ID, which are four-character identifiers use to label programs and data (this is a feature of the Palm OS).</LI>
+<LI>Write a make.bat batch file to automate the application build process. Copying one of the example batch files is a good start.</LI></OL>
+
+<H2><A NAME="limitations"></A>1.6 Limitations</H2>
+<TABLE BORDER CELLSPACING=1 WIDTH=620>
+<TR><TD WIDTH="8%" VALIGN="MIDDLE">
+<STRONG><P>Type</STRONG></TD>
+<TD WIDTH="56%" VALIGN="MIDDLE">
+<STRONG><P>Description</STRONG></TD>
+<TD WIDTH="36%" VALIGN="MIDDLE">
+<STRONG><P>Status</STRONG></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>Limitation</FONT></TD>
+<TD WIDTH="56%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>The Java PilotMain() method won't receive launch codes other than 0 (normal launch). <BR>
+<STRONG>Reason: </STRONG>PalmOS calls an application's PilotMain function in many situations without an explicit request by the user -- but these calls use launch codes different from 0. As Jump2 can possibly crash even before calling the Java PilotMain() method, I decided to handle anything but a normal launch in the safest possible way: an immediate return.</FONT></TD>
+<TD WIDTH="36%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>introduced 05-Jun-00 with Alpha2</FONT></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>Limitation</FONT></TD>
+<TD WIDTH="56%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>Jump needs a JDK 1.2.x or higher.</FONT></TD>
+<TD WIDTH="36%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>limitation</FONT></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>Irrelevant Limitation</FONT></TD>
+<TD WIDTH="56%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>Jump only checks for not-compiler-detectable Runtime Exceptions (e.g. ClassCastException), but not Linking Exceptions (e.g. NoSuchMethodError). Programs that pass the compiler correctly, normally can't generate certain types of exceptions (e.g. Linking Exceptions), so I decided to omit these checks. If you carelessly mix classfiles from incompatible sources, Jump will behave strangely.<BR>
+<EM>If you recompile your Java programs before translating them with Jump, you'll get compile-time warnings or errors for all the Exceptions that Jump's runtime won't throw.</FONT></EM></TD>
+<TD WIDTH="36%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>irrelevant limitation</FONT></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>Limitation</FONT></TD>
+<TD WIDTH="56%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>Jump doesn't have Threads. And I don't know if I'll ever implement threads.<BR>
+<EM>If you need Threads now, don't use Jump.</FONT></EM></TD>
+<TD WIDTH="36%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>limitation</FONT></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>Limitation</FONT></TD>
+<TD WIDTH="56%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>Jump doesn't use 16-bit Unicode, but 8-bit characters</FONT></TD>
+<TD WIDTH="36%" VALIGN="MIDDLE">
+<FONT COLOR="#0000ff"><P>permanent limitation</FONT></TD>
+</TR>
+</TABLE>
+
+<P>There are also some PalmOS-related features not (yet) implemented: </P>
+
+<UL>
+<LI>The following PalmOS API functions aren't supported: </LI></UL>
+
+<TABLE CELLSPACING=0 BORDER=0 WIDTH=620>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<B><P ALIGN="CENTER">Function</B></TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<B><P ALIGN="CENTER">Reason</B></TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>DmFindSortPosition</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>no callback functions</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>DmInsertionSort</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>no callback functions</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>DmQuickSort</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>no callback functions</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>ErrThrow</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>use Java throw instead</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>EvtGetPenBtnList</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>returns pointer to array</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>FindDrawHeader</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>FindParamsPtr</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>FindGetLineBounds</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>FindParamsPtr</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>FindSaveMatch</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>FindParamsPtr</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>FplXxx</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>PalmOS floating point library</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>GetCharAttr</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>returns pointer to array</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>GetCharCaselessValue</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>returns pointer to array</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>GetCharSortValue</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>returns pointer to array</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>GrfMatch </TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>GrfMatchGlyph </TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>LstSetDrawFunction</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>no callback functions</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>PsrXxx</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>no callback functions</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>SlkSendPacket</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>arrays of structures</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>SlkSetSocketListener</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>no callback functions</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>StrCat</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>modifies string data</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>StrChr</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>returns address</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>StrCopy</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>modifies string data</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>StrItoA</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>modifies string data</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>StrItoH</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>modifies string data</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>StrStr</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>returns address</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>StrToLower</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>modifies string data</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>SysInsertionSort</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>no callback functions</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>SysQSort</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>no callback functions</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>TblSetCustomDrawProcedure</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>no callback functions</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>TblSetLoadDataProcedure</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>no callback functions</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>TblSetSaveDataProcedure</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>no callback functions</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>WinGetPattern</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>CustomPatternType</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>WinGetWindowPointer</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>returns pointer to structure</TD>
+</TR>
+<TR><TD WIDTH="46%" VALIGN="MIDDLE">
+<P>WinSetPattern</TD>
+<TD WIDTH="54%" VALIGN="MIDDLE">
+<P>CustomPatternType</TD>
+</TR>
+</TABLE>
+
+
+<UL>
+<LI>Not all of the PalmOS API constants have equivalents in the Java palmos package. </LI></UL>
+
+<P>Some of the PalmOS API functions require the address of a callback routine to be passed to the API function. Examples of these functions are the sorting functions, custom list and table draw functions, SlkSetSocketListener, and some others. These functions are not supported by the current version of Jump. There are a few callback based functions that are supported, such as FrmSetFormHandler.</P>
+<P><HR></P>
+<H1><A NAME="using"></A>2 Using Jump</H1>
+<H2><A NAME="requirements"></A>2.1 Program Requirements</H2>
+<P>Starting with Jump 2.0 Beta3, Jump supports 2 different coding styles, selectable via command-line options:</P>
+
+<UL>
+<LI>PilotMain (the default) </LI>
+<LI>WabaJump </LI></UL>
+
+<P>Depending on the coding style you selected, the requirements differ.</P>
+<H3>PilotMain-style requirements</H3>
+<P>The only requirement that Jump makes of your source code is that you have a function PilotMain in your main class declared like this:</P>
+<PRE>    public static int PilotMain(int cmd, int cmdPBP, int launchFlags)</PRE>
+<P>This is the method that is called when your application starts. For a normal application launch, cmd will be 0 (if it isn't 0, Jump won't call your PilotMain method, but exit instead). This method should normally return 0.</P>
+<P>Resources are expected to be found in a file called <I>classname</I>.res where <I>classname</I> is the name of the main class passed to Jump. This file is copied verbatim into the <I>classname</I>.asm file.</P>
+<H3>WabaJump-style requirements</H3>
+<P>Your main class must extend waba.ui.MainWindow and must have a public no-arguments constructor. Instead of calling a PilotMain method, Jump uses a different startup code creating a waba.sys.JumpApp instance, initialized with an instance of your main class.</P>
+<H2><A NAME="running"></A>2.2 Running Jump</H2>
+<H3>PilotMain style</H3>
+<P>The steps to produce a loadable PRC file have been described briefly in the section on "Installation". Here we go into some more detail (assuming your program's name is MyProg):</P>
+<OL>
+
+<LI>Write your Java sources including <CODE>MyProg.java</CODE>. <CODE>MyProg.java</CODE> must contain a <CODE>PilotMain</CODE> method declared as:<BR>
+<CODE>public static int PilotMain(int cmd, int cmdBPB, int launchFlags)</CODE>.<BR>
+This is the main entry point to your program. Parameter explanations can be found in the "PalmOS Companion &amp; Reference" documentation.</LI>
+<LI>Write a <CODE>MyProg.rcp</CODE> file defining the resources you need in your program (you will use PilRC later to generate the binary resources).</LI>
+<LI>Write a <CODE>MyProg.jump</CODE> file with program-specific options for Jump (application name and ID). If you omit this step, you'll get defaults for application name and ID, generated from your class name.</LI>
+<LI>Open a Command Prompt (MS-DOS, shell, ...) window, and change to the directory where your Java sources are located.</LI>
+<LI>Compile your Java sources using your Java compiler (javac for the Sun JDK). This should create the necessary class files. Example: <BR>
+<CODE>javac *.java</LI>
+</CODE><LI>Use Pilrc with the -R option to compile the <CODE>MyProg.rcp</CODE> file. This should create the <CODE>*.bin</CODE> binary resources plus a reference file <CODE>MyProg.res</CODE> to tell Jump (to be exact: Pila) which resources to include into the program. Example: <BR>
+<CODE>pilrc -R MyProg.res MyProg.rcp</LI>
+</CODE><LI>Run Jump to post-compile the class files into a MyProg.asm file. Example:<BR>
+<CODE>java Jump MyProg</CODE><BR>
+If this is a large program, you will need to add the '-m' (multi-segment) option:<BR>
+<CODE>java Jump -m MyProg</CODE><BR>
+If your program runs out of heap space, you will need to add the '-h' (huge memory model) option:<BR>
+<CODE>java Jump -h MyProg</LI>
+</CODE><LI>Run Pila to assemble the <CODE>MyProg.asm</CODE> file (together with the *.bin resource files) into the Palm binary <CODE>MyProg.prc</CODE>. Example:<BR>
+<CODE>Pila MyProg.asm</CODE><BR>
+If Pila complains about 16-bit displacements being out of range, this probably means that your code is more than 32 KByte and has to be broken into segments: just use Jump with the '-m' option, and everything should be fine.</LI></OL>
+
+<P>If everything goes well, you should now have a MyProg.prc file that is ready to load onto your Palm (or Palm Emulator). If there is a problem, check the following items:</P>
+
+<UL>
+<LI>Jump aborts with "Code missing for xxx" <BR>
+(1): xxx is a method from the standard java class library. Probably you found a method that isn't implemented for Jump yet. If it's important for you, you can try to write a 68K-assembly implementation yourself (please, send it to me) or you can tell me, and I'll put it onto my to-do list.<BR>
+(2): xxx is a method from your code that you declared native. It must be named in your *.jump file under the option "natives" (e.g. "natives=main-native.asm second-native.asm"). The *.asm files must be somewhere on the classpath, the best place is in the same directory where you have your *.jump file. </LI>
+<LI>Pila complains "warning: Displacement out of range". Your program exceeds the 32 KByte limit inherent in the processor's architecture. Recompile with "java Jump -m MyProg". </LI></UL>
+
+<H3>WabaJump style</H3>
+<P>The steps to produce a loadable PRC file for the WabaJump style differ slightly from the PilotMain style:</P>
+<OL>
+
+<LI>Write your Java sources including <CODE>MyProg.java</CODE>. <CODE>MyProg</CODE> must be a subclass of <CODE>waba.ui.MainWindow</CODE> and must have a no-arguments constructor.</LI>
+<LI>If you want program-specific resources, write a <CODE>MyProg.rcp</CODE> file defining the resources that you want in your program (you will use PilRC later to generate the binary resources).</LI>
+<LI>Write a <CODE>MyProg.jump file</CODE> with program-specific options for Jump (application name and ID). If you omit this step, you'll get defaults for application name and ID, generated from your class name.</LI>
+<LI>Open a Command Prompt (MS-DOS, shell, ...) window, and change to the directory where your Java sources are located.</LI>
+<LI>Compile your Java sources using your Java compiler (javac for the Sun JDK or jvc for MS Java SDK). This should create the necessary class files. Example: <BR>
+<CODE>javac *.java</LI>
+</CODE><LI>If you wrote a MyProg.prc file in step 2, use Pilrc (from the ASDK) with the -R option to compile the MyProg.rcp file. This should create the *.bin binary resources plus a reference file MyProg.res to tell Jump (to be exact: Pila) which resources to include into the program. Example: <BR>
+<CODE>pilrc -R MyProg.res MyProg.rcp</LI>
+</CODE><LI>Run Jump to post-compile the class files into a MyProg.asm file. Use the '-w' command-line switch to tell Jump that you are using WabaJump style. Example:<BR>
+<CODE>java Jump -w MyProg<BR>
+</CODE>If this is a large program (and WabaJump programs normally are large), you will need to add the '-m' (multi-segment) option:<BR>
+<CODE>java Jump -mw MyProg</LI>
+</CODE><LI>Run Pila (from the ASDK) to assemble the MyProg.asm file (together with the *.bin resource files, if you have resources) into the Palm binary MyProg.prc. Example:<BR>
+<CODE>Pila MyProg.asm<BR>
+</CODE>If Pila complains about 16-bit displacements being out of range, this probably means that your code is more than 32 KByte and has to be broken into segments: just use Jump with the '-m' option, and everything should be fine.</LI></OL>
+
+<P>If everything goes well, you should now have a MyProg.prc file that is ready to load onto your Palm (or Palm Emulator). If there is a problem, check the following items:</P>
+
+<UL>
+<LI>Jump aborts with "Code missing for xxx" <BR>
+You need a Java method that is declared native, but Jump doesn't have a native implementation for that method. There are 2 situations:<BR>
+(1): xxx is a method from the standard java class library. Probably you found a method that isn't implemented for Jump yet. If it's important for you, you can try to write a 68K-assembly implementation yourself (please, send it to me) or you can tell me, and I'll put it onto my to-do list.<BR>
+(2): xxx is a method from your code that you declared native. It must be named in your *.jump file under the option "natives" (e.g. "natives=main-native.asm second-native.asm"). The *.asm files must be somewhere on the classpath, the best place is in the same directory where you have your *.jump file. Be sure to strictly follow the guidelines for writing native methods. </LI>
+<LI>Pila complains "warning: Displacement out of range". Your program exceeds the 32 KByte limit inherent in the processor's architecture. Recompile with "java Jump -m MyProg". If it still doesn't help, tell me. </LI></UL>
+
+<H2><A NAME="options"></A>2.3 Options</H2>
+<P>There are 3 sources of information that modify Jump's behaviour:</P>
+<OL>
+
+<LI>Command-line options. Jump accepts options between the word "Jump" and the main classname on the command line.</LI>
+<LI>Project-specific properties from a file called "<I>projectname</I>.<CODE>jump</CODE>". You can place it somewhere on the classpath.</LI>
+<LI>General properties from a file called "<CODE>jump.properties</CODE>", located in Jump's JAR file. (If you need to modify it, place your modified copy somewhere on the classpath before the "<CODE>jump.jar</CODE>" file.)</LI></OL>
+
+<P>The numbering denotes a priority ranking: command-line options supersede project-specific properties, which in turn supersede general properties.</P>
+<P>The properties files contain lines of the form "name=value".</P>
+<P>The following properties and options are recognized by Jump:</P>
+<TABLE BORDER CELLSPACING=1 WIDTH=620>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<STRONG><P ALIGN="CENTER">Property</STRONG></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<STRONG><P ALIGN="CENTER">Value</STRONG></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<STRONG><P ALIGN="CENTER">Option</STRONG></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<STRONG><P ALIGN="CENTER">Default</STRONG></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<STRONG><P ALIGN="CENTER">Explanation</STRONG></TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE" ROWSPAN=3>
+<CODE><P>memory</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>small</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">*</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Small memory model: code &lt; 32KB, data in dynamic memory (typ. 32-64KB)</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>large</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-m</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Large memory model: code &gt; 32KB, data in dynamic memory (typ. 32-64KB)</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>huge</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-h</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Huge memory model: code &gt; 32KB, data in storage memory (typ. 1-8MB)</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE" ROWSPAN=2>
+<CODE><P>target</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>jump</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">*</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>"classical" Jump program with PilotMain method</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>wabajump</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-w</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>WabaJump program</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE" ROWSPAN=2>
+<CODE><P>class-names</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>no</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-c</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Class names are not included in the output. Uncaught exceptions and Class.getName() will indicate a class name of "Unknown". This option reduces the size of the prc file at the expense of less debug information. It may also be useful for very large projects where the kernel code segment might otherwise exceed 64K bytes.</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>yes</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">*</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Class names are included in the output.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE" ROWSPAN=2>
+<CODE><P>Dynamic-class-init</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>no</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">*</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>All static class initializers are called prior to creating the application instance. Applications should not rely on the order of class initialization. However see the <CODE>early-init</CODE> option for a way to ensure that classes are initialized before others.</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>yes</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;-y</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Additional code is generated to check that a class is initialized before it is used. This code slows down the application somewhat and increases the size. Classes are not initialized until used. This provides better compatibility with VMs at the prices of a slight reduction in performance.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE" ROWSPAN=2>
+<CODE><P>use-pilot-inc</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>no</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">*</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Normal operation</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>yes</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-p</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Include pilot.inc in the assembler output instead of jump.inc. This should only be used if the Jump compiler is used with old palmos classes. For backward compatibility only.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE" ROWSPAN=3>
+<CODE><P>debug</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>no</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">*</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>no debugging support</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>symbols</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-g</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>procedure names in MacsBug format included</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>break</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-b</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>procedure names in MacsBug format included, program starts into a breakpoint </TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE" ROWSPAN=7>
+<CODE><P>optimization</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>0</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-O0</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>No optimization. Results are similar to earlier versions of Jump.</P>
+<P>While the compiler default is -O0 this is overridden by the standard jump.properties file to be level 5.</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>1</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-O1</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Simple peephole optimizations are applied. Exception handling code is reduced. Array initializations are improved. Multiply by small constant speedup.</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>2</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-O2</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Remove of some null-pointer checks when dereferencing <CODE>this</CODE>.</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>3</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-O3</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Removal of many more null-pointer checks and additional peephole optimizations.</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>4</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-O4</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Adds A0 pointer caching. This can speed up instance field accesses and arrays.</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>5</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-O5</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Adds improvements in putfield operations and arrays; often avoiding pushing the source object on the Java stack. This can improve the performance of assignments to instance fields.</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>6</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-O6</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">*</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>For large and huge model applications method calls to the same segment avoid inter-segment vectoring. Methods that simply return an instance field are inlined (not <CODE>long</CODE> and <CODE>double</CODE>). Local variables can be allocated in registers.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE" ROWSPAN=2>
+<CODE><P>Check-bounds</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>no</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-a</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Array bounds are not checked. This option results in faster and smaller code but is unsafe in that indexing arrays with invalid values will not throw an exception. Be sure that you code does not produce ArrayIndexOutOfBoundsException before enabling this option.</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>y</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">*</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Array bounds are checked. This is normal operation.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE" ROWSPAN=2>
+<CODE><P>check-null</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>no</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-n</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Object and array references are not checked for null. This option results in faster and smaller code but is unsafe in that dereferencing a null pointer will not throw an exception. Be sure that you code does not produce NullPointerException before enabling this option.</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>yes</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">*</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Pointers are checked for null. Optimization may still removed some null-pointer checks that are considered safe.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>check-stack</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>Yes/no</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-S</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">yes</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Generate code to check for stack overflow as part of the function prologue.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE" ROWSPAN=3>
+<CODE><P>verbose</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>0</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">*</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>short form of output</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>1</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-v</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>long form of output</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>2</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-V</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<P ALIGN="CENTER">-</TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>very verbose output</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>instances</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>List of classes</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">(empty)</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Blank separated list of classes that Jump should assume has instances. This is useful when objects are created dynamically via <CODE>Class.newInstance()</CODE>. Jump can infer which classes have instances in other cases.</P>
+<P>The class names should use slashes (/) to separate components of the package path e.g. waba/fx/Image rather than periods (waba.fx.Image).</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>natives</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>list of files</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">(empty)</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Blank-separated list of *.asm files containing native methods for this project</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>includes</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>List of files</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">(empty)</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Blank-separated list of *.inc files containing additional definitions. These files are copied to the output assembler file. This is useful when using MkApi to interface to custom libraries.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>jump-early-init</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>list of classes</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">(empty)</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Classes listed here have there class initializers called in list order. All other class initializers are call after these; their order is arbitrary. For example <CODE>waba/sys/NativeMethods waba/fx/NativeMethods.</CODE> This functionality an also be accessed via the native call interface.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>early-init</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>list of classes</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">(empty)</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Classes listed here have there class initializers called in list order, after those specified with <CODE>jump-early-init</CODE>. All other class initializers are call after these; their order is arbitrary. For example <CODE>waba/sys/NativeMethods4JDK waba/fx/NativeMethods4JDK.</CODE> This functionality an also be accessed via the native call interface.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<FONT FACE="Courier New" SIZE=2><P>called-virtually-without-instances</FONT></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>list of classes</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">(empty)</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Warnings about methods called virtually without instances are suppressed if the methods class or interface is listed here.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>init-static-array-data</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>yes/no</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-A&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">no</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Force initialization of static array data in class initialization.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>appname</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>string</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">main classname</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>The name to be used as application name with Palm OS</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>appid</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>4-char string</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>&nbsp;</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">from main classname</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>The application ID for Palm OS. Default is derived from the first 4 characters of the main class name, case modified: upper/lower/upper/lower</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>stacksize</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>number of bytes</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-s&nbsp;bytes</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P>OS dependent</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>The stack size to be used (expressed in bytes). Default is 2000-3000 bytes, depending on the Palm OS version. <STRONG>The property is not respected prior to Palm OS 3.0</STRONG>.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>segment-bytecode-limit</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>number of bytes</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-B&nbsp;bytes</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P>3200</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Sets the number of byte codes that are compiled into one code segment. A larger limit means less code segments per application, and a somewhat smaller <CODE>prc</CODE> file. Care is needed because if the limit is too large then a code segment may overflow. The limit must be between 2000 and 10000.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE" ROWSPAN=2>
+<CODE><P>finalize</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>no</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-f</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">-</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Do not generate code for <CODE>finalize()</CODE> methods or include finalize support. Warnings about bad practice for finalizers are turned off.</TD>
+</TR>
+<TR><TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>yes</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<P>&nbsp;</TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">*</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Include code for <CODE>finalize()</CODE> methods and finalize support if any class <I>with instances</I> defines a <CODE>finalize()</CODE> method.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>asm-path-uses-package</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>yes/no</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-q</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">yes</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>By default the package name of the main class is used as the path for the assembler file output. Using <CODE>-q</CODE> turns this off, so that the file is created in the current directory even if the main class has is in a package.</TD>
+</TR>
+<TR><TD WIDTH="6%" VALIGN="MIDDLE">
+<CODE><P>peephole</CODE></TD>
+<TD WIDTH="7%" VALIGN="MIDDLE">
+<CODE><P>yes/no</CODE></TD>
+<TD WIDTH="5%" VALIGN="MIDDLE">
+<CODE><P>-P</CODE></TD>
+<TD WIDTH="10%" VALIGN="MIDDLE">
+<EM><P ALIGN="CENTER">-</EM></TD>
+<TD WIDTH="72%" VALIGN="MIDDLE">
+<P>Turn on/off the use of the peephole optimizer. If the peephole phase would otherwise be performed then this option turns it off, and vice versa.</TD>
+</TR>
+</TABLE>
+
+<P><HR></P>
+<H1><A NAME="technical"></A>3 Technical Information</H1>
+<H2><A NAME="native"></A>3.1 Native Code Interface</H2>
+<P>You find detailed information on the native-code interface <A HREF="native.htm">in a separate document</A>. You find detailed information on the memory management <A HREF="memory.htm">in a separate document</A>.</P>
+<P>&nbsp;</P>
+<H2><A NAME="optimize"></A>3.2 Optimizations</H2>
+<P>Jump2 contains some optimizations on the conceptual.</P>
+<H3>Replacing vtable calls by direct calls</H3>
+<P>In object-oriented languages, when you call a method on some object, there are normally many different implementations of this method in different classes. The decision which one to call actually, is made during run-time, based on the run-time type of the object. Traditionally, so-called "virtual function tables" ("vtables") are used.</P>
+<P>On the other hand, as a programmer, you can often tell exactly which method implementation will be called in a given place, meaning that a vtable for this call isn't necessary, a direct call of that method is O.K. too.</P>
+<P>Jump2 contains an optimization that tries to find those situations where a vtable-based method call can be replaced by a simple direct function call.</P>
+<P>To do this, we need to know whether a given class has instances or not. If there is a method call for method M in class C, we collect all subclasses of C (plus C itself) having instances. For all of these classes with instances, we search upwards the class tree to find the method implementation that applies to this class. If we always find the very same implementation, we can simply generate a direct call of that implementation. If we find more than one implementation, we really need a vtable.</P>
+<P>In practice, vtables can be eliminated in many method calls, see the following examples:</P>
+
+<UL>
+<LI>The "Life" sample program needs a vtable for just 1 method: Object.toString(). </LI>
+<LI>The "Hello" program needs a vtable for just 1 method: Object.toString(). </LI>
+<LI>The "DecHex" program needs a vtable for just 1 method: Object.toString(). </LI>
+<LI>The "Morse" program needs a vtable for just 1 method: Object.toString(). </LI>
+<LI>The "MenuExample" program needs a vtable for just 1 method: Object.toString(). </LI></UL>
+
+<P>As I said, we need to know which classes have instances. We can find it out by looking for places where new instances are created (JVM instructions like 'new', 'newarray' and so on). Some objects (namely exceptions) can be created by the Java runtime system without a specific 'new' instruction, so we have to mark some exception classes as "having instances" too.</P>
+<H3>Replacing 'instanceof' searching by table lookups</H3>
+<P>In principle, the 'instanceof' operator requires a JVM to search the class tree / class graph upwards along superclasses, interfaces and superinterfaces. Jump replaces this searching process by a simple table lookup. For the fixed set of classes of a single program, Jump builds a boolean matrix, where a 1 at (c1,c2) means that an instance of class c1 is 'instanceof' a class c2. So, a single bit-array access decides the 'instanceof' relation.</P>
+<P>The matrix is sparse, some rows and columns are completely eliminated:</P>
+
+<UL>
+<LI>Some classes don't have instances, they'll never be 'c1'. </LI>
+<LI>Only few classes are used as 'instanceof' targets 'c2': those explicitly named in 'instanceof' operations, those used in cast expressions, and component classes of reference arrays. </LI></UL>
+
+<P>This allows for a compact implementation of the matrix.</P>
+<H3>Optimizing class initializer methods</H3>
+<P>According to the JVM specification, class initializer methods are called automatically by the JVM before a class is used for the first time (the exact definition of "being used" in this context is a bit complicated). For any class needing static initializations we find a single static method named &lt;clinit&gt;. This method contains instructions to set static fields of that class to initial values, together with any code from 'static { ... }' sections in the class definition.</P>
+<P>All these distinct initializations are merged into a single initializer method by the Java compiler :-(. We can't completely exclude &lt;clinit&gt; methods, as the Java 1.2 class library needs them, but if we include them completely, we get nearly the whole library into even the smallest programs, because some part of the &lt;clinit&gt; method needs some other class that also has a &lt;clinit&gt; method, and so on.</P>
+<P>So, I decided to introduce a "needed"-flagging on the single-instruction level for &lt;clinit&gt; methods. This flagging follows these guidelines:</P>
+
+<UL>
+<LI>An instruction producing a visible effect (e.g. writing into a needed field) is needed. If no such instruction is found in a &lt;clinit&gt; method, that method isn't needed. </LI>
+<LI>An instruction is needed if it produces data used later by another needed instruction. </LI></UL>
+
+<P>I also implemented 2 potentially dangerous optimizations:</P>
+
+<UL>
+<LI>Calling an &lt;init&gt; method (instance constructor) for an unneeded instance isn't needed. If an unneeded field is initialized like "SomeType fld=new SomeType(...)", this optimization allows us to delete the whole code, although in theory it's possible that an insanely-written constructor (called by the 'new SomeType(...)' expression) has important side-effects. Simply, you should only put things into a constructor that have to do with the newly-created instance. </LI>
+<LI>If a class initializer calls a static method from the very same class, and this method has a retrun-value (isn't declared "void"), then we assume that this method is ONLY called for its result and that we can delete this method call if we don't need its result. I haven't found a counter-example in the Java libs where the call is needed for some side-effect. This optimization eliminates many useless method calls, but keep in mind that <U>there is a real risk here</U>. </LI></UL>
+
+<P>A future version of Jump2 will make these optimizations user-switchable.</P>
+<H2><A NAME="miscellaneous"></A>3.3 Miscellaneous notes</H2>
+<H3>On memory management and the garbage collector:</H3>
+<P>Since Beta4, Jump has a quite conventional mark-and-sweep garbage collector. </P>
+<P>Jump pre-allocates blocks of 4 KByte each. When the next new object no longer fits into the blocks so-far allocated, Jump starts the GC. The GC starts at a "root set" consisting of the register contents, the stack contents and the static objects. When it detects a bit pattern that looks like a pointer into Jump's data blocks, it marks the object thus referenced as being in use. Then the GC sequentially sweeps through the objects in the data blocks. When it finds an object marked "in use", it also marks all other objects referenced by this one as being in use, too. The GC is finished when in a sweep no additional object has been marked. All the objects not bearing a mark are free memory to be reused for new allocations.</P>
+<H3>On using POSE:</H3>
+<P>It's no longer necessary to switch off some debug options in POSE, especially "MemMgr Data Structure" and "Free Chunk Access". </P>
+<H3>On calling PalmOS API functions:</H3>
+<P>For calls that return a pointer to a string, the stub creates a temporary Java byte[] array whose data pointer is initialized with the return value of the function, then calls the String constructor that takes a byte[] and creates a Java String. The end result is that the String class makes a copy of the data in the Java memory space.</P>
+<P>For calls like DateToAscii that take a pointer to a buffer as a parameter, the stub generator makes the parameter a Java StringBuffer. Then it passes the address of the array data to the API function, which fills it in. After the API function returns, the stub tweaks the length field of the StringBuffer so that the characters show up properly. Be sure to allocate a StringBuffer that is long enough to hold the expected characters!</P>
+<P>There is a tool <A HREF="mkapi.htm">MkApi</A> that generates the implementation. If you NEED additional PalmOS traps, MkApi might help you. But it's your responsibility to deal with the results ;-).</P>
+<P><HR></P>
+<H1><A NAME="appendices"></A>Appendices</H1>
+<H2><A NAME="future"></A>A Future Enhancements</H2>
+<P>Here is a list of features that I would like to put into Jump. If you have any features you would like to see in Jump, please let me know! </P>
+
+<UL>
+<LI>A portable (Java) assembler and resource compiler, so Jump can be run on non-Windows platforms. <EM>(Greg's idea) </EM>Pila and PilRC have been ported to different OSes, so this is no longer as important as it used to be. </LI>
+<LI>Or maybe a modified back-end using GNU assembler syntax (grr !!) to achieve portability. <EM>(Ralf's idea)</EM>. Currently it is possible to generate GNU syntax code but this is not 100% working.</LI></UL>
+
+<P>The current state of development can be found in the <A HREF="change-log.htm">Jump2 Change Notes</A>.</P>
+<H2><A NAME="thanks"></A>B Thanks to...</H2>
+<EM><P>(from Ralf to ...):</P>
+<P>Greg Hewgill</EM><U> ( </U><A HREF="mailto:greg@hewgill.com">greg@hewgill.com</A><U> ), the original developer of Jump. Thanks for inventing it and making it free software. And thank you for Copilot, the PalmOS emulator now known as POSE. It's indispensible for any Palm programmer.</P>
+</U><EM><P>Eric Sessoms</EM><U> ( </U><A HREF="mailto:sessoms@pagesz.net">sessoms@pagesz.net</A><U> ), the author of </U><A HREF="http://www.pagesz.net/~sessoms/debuffer/">Debuffer</A><U>, a FORTH-based, programmable debugger interacting with POSE. Debuffer helped me a lot in finding errors. Its programmability allows for powerful debugging and data inspection macros. I had to learn the basics of FORTH first, but it was worth the pain!</P>
+</U><EM><P>Keith Rollin</EM><U> ( </U><A HREF="mailto:krollin@palm.com">krollin@palm.com</A><U> ) was very helpful in answering questions on technical details of PalmOS.</P>
+</U><EM><P>George Magiros</EM><U> ( </U><A HREF="mailto:george@stonehenge.ohr.gatech.edu">george@stonehenge.ohr.gatech.edu</A><U> ) contributed opcode implementations for the float and double data types.</P>
+<I><P>Darrin Massena</I> ( </U><A HREF="http://www.massena.com/darrin/pilot">Pilot Software Development</A><U> ) not only developed Pila, the Pilot Assembler, but also hosts the pilot.programmer.* newsgroups on his </U><A HREF="news://news.massena.com/">news.massena.com</A><U> server.</P>
+</U><EM><P>Wes Cherry</EM><U> ( </U><A HREF="mailto:wesc@ricochet.net">wesc@ricochet.net</A><U> ) developed PilRC, the least painful way (as far as I know) of creating Palm resources.</P>
+</U><EM><P>Noli Sicad </EM><U>( </U><A HREF="mailto:nsicad@yahoo.com">nsicad@yahoo.com</A><U> ) did a lot of testing and contributed many ideas, informations and example programs.</P>
+<P>Both</U><EM> Rob Nielsen </EM><U>( </U><A HREF="mailto:rnielsen@wn.com.au">rnielsen@wn.com.au</A><U> ) and</U><EM> Peter Carroll </EM><U>( </U><A HREF="mailto:kedge@se77en.com">kedge@se77en.com</A><U> ) did a lot of testing and are actively developing the WabaJump Waba compatibility classes for Jump.</P>
+<P>The GNU Classpath team at </U><A HREF="http://www.classpath.org/">http://www.classpath.org</A><U> . I took some classes from their repository and I'm sure there are lots of other useful classes...</P>
+</U><EM><P>...and to all the volunteers ready to experiment with an unstable tool.</P>
+<U><P>(and from Greg for Jump version 1.0 to ...):</P>
+</U></EM><I><P>Darrin Massena</I> (<A HREF="http://www.massena.com/darrin/pilot">Pilot Software Development</A><U>) for Pila, the Pilot Assembler. Darrin is also leading the effort to put together the </U><A HREF="http://www.massena.com/darrin/pilot/asdk/asdk.htm">Alternative SDK</A><U>, a suite of tools for Pilot development that is independent of the Macintosh.</P>
+<I><P>Sam Neth</I> (</U><A HREF="http://www.identify.com/nethSoft/Pilot">nethSoft Pilot Page</A><U>) for convincing me that rewriting Jump itself in Java really was a good idea (I originally wrote it in C++).</P>
+<I><P>Thomas Werthmann-Auzinger</I> for the prodding that was required to get me to actually release the source.</P>
+</U><P><HR></P>
+<U><ADDRESS>Jump is Copyright &copy; 1996,1997 by Greg Hewgill, Copyright &copy; 2000,2001 by Ralf Kleberhoff and Copyright &copy; 2001-2004 by Peter Dickerson.<BR>
+Email: </U><A HREF="mailto:kleberhoff@aol.com">kleberhoff@aol.com</A><U> </ADDRESS>
+</U><P><HR></P>
+<U><FONT SIZE=2><P>Java and all Java-based trademarks and logos are trademarks or registered trademarks of Sun Microsystems, Inc. in the U.S. and other countries.</FONT> </P></U></BODY>
+</HTML>

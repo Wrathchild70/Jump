@@ -1,0 +1,49 @@
+VERSION "1.0"
+ICON "DecHex.bmp"
+MENU ID 1000
+BEGIN
+    PULLDOWN "Options"
+    BEGIN
+        MENUITEM "About DecHex..." 1002 "A"
+    END
+END
+
+FORM 1000 0 0 160 160
+USABLE
+NOFRAME
+MENUID 1000
+BEGIN
+    TITLE "DecHex"
+
+    LABEL "Decimal:" 2000 30 30 FONT 1
+    FIELD 1004 PREVLEFT PREVTOP+10 60 AUTO UNDERLINED EDITABLE SINGLELINE MAXCHARS 11
+    LABEL "Hex:" 2001 100 30 FONT 1
+    FIELD 1005 PREVLEFT PREVTOP+10 50 AUTO UNDERLINED EDITABLE SINGLELINE MAXCHARS 9
+    BUTTON "Convert" 1003 CENTER CENTER AUTO AUTO
+    GRAFFITISTATEINDICATOR 0 150
+END
+
+ALERT 1000
+INFORMATION
+BEGIN
+    TITLE "About DecHex"
+    MESSAGE "This sample application was written using Jump. For more information see http://sourceforge.net/projects/jump"
+    BUTTONS "Cool!"
+END
+
+ALERT 1001
+ERROR
+BEGIN
+    TITLE "Oops"
+    MESSAGE "Please write a number to be converted."
+    BUTTONS "OK"
+END
+
+ALERT 1002
+ERROR
+BEGIN
+    TITLE "Oops"
+    MESSAGE "Your number is out of range. Use decimal values in the range of -2147483647 to 2147483647 and hexadecimal values in the range from -7FFFFFFF to 7FFFFFFF."
+    BUTTONS "OK"
+END
+

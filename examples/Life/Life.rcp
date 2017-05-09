@@ -1,0 +1,22 @@
+VERSION "1.0"
+ICON "Life.bmp"
+FORM 1000 0 0 160 160
+USABLE
+NOFRAME
+BEGIN
+    BUTTON "Step" 1010 2 146 AUTO AUTO
+    BUTTON "Run" 1011 prevright+4 146 AUTO AUTO
+    BUTTON "Stop" 1012 prevright+4 146 AUTO AUTO
+    BUTTON "About" 1019 123 146 AUTO AUTO
+END
+
+ALERT 1100
+INFORMATION
+BEGIN
+    TITLE "Life Sample"
+    MESSAGE "This is an implementation of Conway's game of Life. "\
+            "It is written in Java and compiled into a Pilot .prc file "\
+            "using Jump. For more information, see:\n\n"\
+            "http://userzweb.lightspeed.net/~gregh/pilot"
+    BUTTONS "OK"
+END

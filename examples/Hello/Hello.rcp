@@ -1,0 +1,9 @@
+VERSION "1.0"
+ICON "Hello.bmp"
+FORM 1000 0 0 160 160
+USABLE
+NOFRAME
+BEGIN
+    TITLE "Hello World"
+    LABEL "Hello, world!" 1001 60 70
+END

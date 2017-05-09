@@ -1,0 +1,103 @@
+// Source Safe Version information
+// $Header: \Waba\Jump\source\tools\symbol.api 3     11/04/02 6:22p Rmontrose $
+// $Modtime: 11/04/02 6:19p $
+// $NoKeyWords: $
+//-----------------------------------------------------------------------------
+//
+// Symbol Barcode Scanner API
+//
+// Taken from ScanMgrLib.h by john@acaciacons.com.au
+// The normal Symbol library must be used with CodeWarrior and provides a shell
+// around the API. These are the direct calls to the ScanMgr.prc library
+//
+// Modification Log:
+//
+//
+//
+//
+
+java
+    public final static int ROMToken = ('s'<<24)|('c'<<16)|('n'<<8)|'r';
+    public final static int DECODE_UPC_EAN_SUPPLEMENTALS = 0x10;
+    public final static int PARAM_DECODER_ENABLE = 0xAC;
+    public final static int LEVEL = 0x00;
+    public final static int SCAN_ANGLE_NARROW = 0xB5;
+    public final static int SCAN_ANGLE_WIDE = 0xB6;
+endjava
+
+// A801
+Err &ScanMgrLibOpen(UInt16 refNum, UIntPtr value);
+// A802
+Err &ScanMgrLibClose(UInt16 refNum, ULongPtr numappsP);
+Err &ScanMgrLibClose(UInt16 refNum, Int32 numappsP);
+// A803
+Err &ScanMgrLibSleep(UInt16 refNum);
+// A804
+Err &ScanMgrLibWake(UInt16 refNum);
+
+// A805
+Err &ScanMgrLibGetLibAPIVersion(UInt16 refNum, ULongPtr version);
+
+// A806 return both as a pointer to memory and also an Object Pointer, if we get an object for this
+Err &ScanKernGetDecodedData(UInt16 refNum, voidptr messagePtr);
+Err &ScanKernGetDecodedData(UInt16 refNum, VoidPtr messagePtr);
+
+// A807
+Err &ScanKernCommandSend(UInt16 refNum);
+
+// A808
+Err &ScanKernSendParams(UInt16 refNum, Enum beep);
+
+// A809 - general purpose function to send commands to Symbol
+Err &ScanKernParamPacket(UInt16 refNum, Int param1, Int param2 , Int param3 ,Int param4 );
+Err &ScanSetBarcodeEnable(UInt16 refNum, Int barcodeType, Int bEnable , Int param1 ,Int param2 );
+Err &ScanSetTriggeringModes(UInt16 refNum, Int triggerModeCmd, Int triggerMode , Int param1 ,Int param2 );
+Err &ScanGetExtendedDecodedData(UInt16 refNum, Int16 length, Int16Ptr type, ByteArray extendedData);
+
+// A80A - get the parameter value. Returns in error return
+Err &ScanKernParamRequest(UInt16 refNum, Int command);
+Err &ScanGetBarcodeEnabled(UInt16 refNum, Int barcodeType);
+
+// A80B
+Err &ScanKernParamRequestMultiple(UInt16 refNum);
+
+// A80C
+Err &ScanKernGetParam(UInt16 refNum);
+
+// A80D
+Err &ScanKernParamBatchIsRoom(UInt16 refNum);
+
+// A80E
+Err &ScanKernGetAllParams(UInt16 refNum);
+
+// A80F
+Err &ScanKernCmdLED(UInt16 refNum);
+
+// A810
+Err &ScanKernBeep(UInt16 refNum, Enum beepType);
+
+// A811
+Err &ScanKernSetBeepParams(UInt16 refNum, Enum param, UInt16 beepFreqDur);
+
+// A812
+Err &ScanKernGetBeepParams(UInt16 refNum);
+
+// A813 Point to an object with this data structure
+Err &ScanKernDecInitDecoder(UInt16 refNum, VoidPtr initData);
+Err &ScanKernDecInitDecoder(UInt16 refNum, SymbolComm initData);
+
+// A814
+Err &ScanKernDecKillDecoder(UInt16 refNum);
+
+// A815
+Err &ScanKernSetLocalParam(UInt16 refNum, Int16 cmd, Int16 param);
+
+// A816
+Err &ScanKernGetLocalParam(UInt16 refNum, UInt16 cmd);
+
+// A817
+Err &ScanKernGetVersionString(UInt16 refNum, UInt16 cmd, CharBuf string, UInt16 len);
+
+// A818
+Err &ScanGetPrefixSuffixValue(UInt16 refNum, CharPtr pPrefix, CharPtr pSuffix_1, CharPtr pSuffix_2);
+

@@ -1,0 +1,1080 @@
+// palmos.api modifed by Peter M Dickerson <peter.dickerson@ukonline.co.uk>
+// to support multiple OS versions
+// 01 Feb 2002, Merged Rod Montrose's (RCM's) API additions
+// RCM Modification Log:
+// 11/03/01 RCM added Pacific MicroInstrument MNI-12 board functions
+// 11/10/01 RCM added sysTrapFontSelect, sysTrapFntDefineFont (Scott's functions)
+// 11/16/01 RCM added WinScreenMode, SysGetOSVersionString
+// sysTrapWinScreenMode, sysTrapSysGetOSVersionString, sysTrapSysLibLoad,
+// section of bitmap.h (sysTrapBmpCreate, sysTrapBmpDelete, sysTrapBmpCompress,
+// sysTrapBmpGetColortable, sysTrapBmpGetBits, sysTrapBmpSize, sysTrapBmpBitsSize,
+// sysTrapBmpColortableSize, sysTrapWinCreateBitmapWindow, sysTrapWinGetBitmap
+// and sysTrapDlkGetSyncInfo to allow getting user name
+// 12/19/01 - RCM Added support for Ver 2.0 Old Serial routines, and added SysTicksPerSecond to get
+// real number of ticks per second.
+// Added New Serial Manager support, thanks to Kien Pham
+// 12 Dec 2002
+// Extended new serial manager support and added SelectTime
+// 10-11-2002 RCM - Added v2 Preferences, cleaned up file (grouped by function), add getROMToken
+
+//alm
+palmos 1.0
+ULong    AlmGetAlarm(UInt cardNo, LocalID dbID, DWordPtr refP);
+Err      AlmSetAlarm(UInt cardNo, LocalID dbID, DWord ref, ULong alarmSeconds, Boolean quiet);
+
+// bitmap
+palmos 3.5
+BitmapPtr BmpCreate(Coord width, Coord height, byte depth, ColorTablePtr colortable, UIntPtr error);
+Err       BmpDelete(BitmapPtr bitmapP);
+Err       BmpCompress(BitmapPtr bitmap, Enum compType );
+voidptr   BmpGetBits(BitmapPtr bitmap);
+ColorTablePtr BmpGetColortable(BitmapPtr bitmap);
+UInt      BmpSize(BitmapPtr bitmapP);
+UInt      BmpBitsSize(BitmapPtr bitmapP);
+UInt      BmpColortableSize(BitmapPtr bitmapP);
+palmos 5.0 High-Density Display Feature Set
+BitmapPtr BmpGetNextBitmapAnyDensity(BitmapPtr bitmap) = sysTrapHighDensityDispatch selector HDSelectorBmpGetNextBitmapAnyDensity;
+UInt8	  BmpGetVersion(const BitmapPtr bitmap) = sysTrapHighDensityDispatch selector (HDSelectorBmpGetVersion;
+Enum	  BmpGetCompressionType(const BitmapPtr bitmap) = sysTrapHighDensityDispatch selector HDSelectorBmpGetCompressionType;
+UInt16	  BmpGetDensity(const BitmapPtr bitmap) = sysTrapHighDensityDispatch selector HDSelectorBmpGetDensity;
+Err		  BmpSetDensity(BitmapPtr bitmap, UInt16 density) = sysTrapHighDensityDispatch selector HDSelectorBmpSetDensity;
+Boolean	  BmpGetTransparentValue(const BitmapPtr bitmap, DWordPtr transparentValueP) = sysTrapHighDensityDispatch selector HDSelectorBmpGetTransparentValue;
+void	  BmpSetTransparentValue(BitmapPtr bitmap, UInt32 transparentValue) = sysTrapHighDensityDispatch selector HDSelectorBmpSetTransparentValue;
+BitmapPtr BmpCreateBitmapV3(const BitmapPtr bitmap, UInt16 density, const voidptr bits, const ColorTablePtr colorTableP) = sysTrapHighDensityDispatch selector HDSelectorBmpCreateBitmapV3;
+
+//category
+palmos 1.0
+void     CategoryCreateList(DmOpenRef db, ListPtr lst, Word currentCategory, Boolean showAll) = sysTrapCategoryCreateListV10;
+Boolean  CategoryEdit(DmOpenRef db, WordPtr category) = sysTrapCategoryEditV10;
+Word     CategoryFind(DmOpenRef db, CharPtr name);
+void     CategoryFreeList(DmOpenRef db, ListPtr list) = sysTrapCategoryFreeListV10;
+void     CategoryGetName(DmOpenRef db, Word index, CharPtr name);
+Word     CategoryGetNext(DmOpenRef db, Word index);
+void     CategoryTruncateName(CharPtr name, Word maxWidth);
+void     CategorySetTriggerLabel(ControlPtr ctl, CharPtr name);
+Boolean  CategorySelect(DmOpenRef db, FormPtr frm, Word ctlID, Word lstID, Boolean title, WordPtr categoryP, CharPtr categoryName) = sysTrapCategorySelectV10;
+palmos 2.0
+Boolean  CategoryEdit(DmOpenRef db, WordPtr category, ULong titleStrID) = sysTrapCategoryEditV20;
+void     CategorySetName(DmOpenRef db, Word index, CharPtr name);
+palmos 3.0
+Boolean  CategoryEdit(DmOpenRef db, WordPtr category, ULong titleStrID, Byte numUneditableCategories);
+
+//clipboard
+palmos 1.0
+void     ClipboardAddItem(ClipboardFormatType format, VoidPtr ptr, Word length);
+VoidHand ClipboardGetItem(ClipboardFormatType format, WordPtr length);
+
+//ctl
+palmos 1.0
+void     CtlDrawControl(ControlPtr ControlP);
+void     CtlEraseControl(ControlPtr ControlP);
+CharPtr  CtlGetLabel(ControlPtr ControlP);
+short    CtlGetValue(ControlPtr ControlP);
+Boolean  CtlHandleEvent(ControlPtr ControlP, EventPtr EventP);
+void     CtlHideControl(ControlPtr ControlP);
+void     CtlHitControl(ControlPtr ControlP);
+Boolean  CtlEnabled(ControlPtr ControlP);
+void     CtlSetEnabled(ControlPtr ControlP, Boolean enable);
+void     CtlSetLabel(ControlPtr ControlP, CharPtr newLabel);
+void     CtlSetUsable(ControlPtr ControlP, Boolean usable);
+void     CtlSetValue(ControlPtr ControlP, short newValue);
+void     CtlShowControl(ControlPtr ControlP);
+
+//dl (Direct Link or Hotsync)
+palmos 1.0
+Err      DlkGetSyncInfo(ULongPtr succSyncDate, ULongPtr lastSyncDate, UBytePtr syncState, CharBuf nameBuf, CharBuf logBuf, ULongPtr logLen);
+Err      DlkGetSyncInfoUserName(voidptr succSyncDate, voidptr lastSyncDate, voidptr syncState, CharBuf nameBuf, voidptr logBuf, voidptr logLen) = sysTrapDlkGetSyncInfo;
+
+//dm
+palmos 1.0
+Err      DmArchiveRecord(DmOpenRef dbR, UInt index);
+Err      DmAttachRecord(DmOpenRef dbR, UIntPtr atP, Handle newH, Handle* oldHP);
+Err      DmAttachResource(DmOpenRef dbR, VoidHand newH, ULong resType, Int resID);
+Err      DmCloseDatabase(DmOpenRef dbR);
+Err      DmCreateDatabase(UInt cardNo, CharPtr nameP, ULong creator, ULong type, Boolean resDB);
+Err      DmCreateDatabaseFromImage(Ptr bufferP);
+Err      DmDatabaseInfo(UInt cardNo, LocalID dbID, CharBuf nameP, UIntPtr attributesP, UIntPtr versionP, ULongPtr crDateP, ULongPtr modDateP, ULongPtr bckUpDateP, ULongPtr modNumP, LocalID* appInfoIDP, LocalID* sortInfoIDP, ULongPtr typeP, ULongPtr creatorP);
+Err      DmDatabaseSize(UInt cardNo, LocalID dbID, ULongPtr numRecordsP, ULongPtr totalBytesP, ULongPtr dataBytesP);
+Err      DmDeleteDatabase(UInt cardNo, LocalID dbID);
+Err      DmDeleteRecord(DmOpenRef dbR, UInt index);
+Err      DmDetachRecord(DmOpenRef dbR, UInt index, Handle* oldHP);
+Err      DmDetachResource(DmOpenRef dbR, Int index, VoidHand* oldHP);
+LocalID  DmFindDatabase(UInt cardNo, CharPtr nameP);
+Err      DmFindRecordByID(DmOpenRef dbR, ULong uniqueID, UIntPtr indexP);
+Int      DmFindResource(DmOpenRef dbR, ULong resType, Int resID, VoidHand findResH);
+Int      DmFindResourceType(DmOpenRef dbR, ULong resType, Int typeIndex);
+//UInt     DmFindSortPosition(DmOpenRef dbR, VoidPtr newRecord, DmComparF* compar, Int other) = sysTrapDmFindSortPositionV10;
+LocalID  DmGetAppInfoID(DmOpenRef dbR);
+LocalID  DmGetDatabase(UInt cardNo, UInt index);
+Err      DmGetLastErr();
+Err      DmGetNextDatabaseByTypeCreator(Boolean newSearch, DmSearchStatePtr stateInfoP, ULong type, ULong creator, Boolean onlyLatestVers, UIntPtr cardNoP, LocalID* dbIDP);
+VoidHand DmGetRecord(DmOpenRef dbR, UInt index);
+VoidHand DmGetResource(ULong type, Int ID);
+VoidHand DmGetResourceIndex(DmOpenRef dbR, Int index);
+VoidHand DmGet1Resource(ULong type, Int ID);
+//Err      DmInsertionSort(DmOpenRef dbR, DmComparF* compar, Int other);
+Err      DmMoveCategory(DmOpenRef dbR, UInt toCategory, UInt fromCategory, Boolean dirty);
+Err      DmMoveRecord(DmOpenRef dbR, UInt from, UInt to);
+VoidHand DmNewHandle(DmOpenRef dbR, ULong size);
+DmOpenRef DmNextOpenDatabase(DmOpenRef currentP);
+DmOpenRef DmNextOpenResDatabase(DmOpenRef dbR);
+VoidHand DmNewRecord(DmOpenRef dbR, UIntPtr atP, ULong size);
+VoidHand DmNewResource(DmOpenRef dbR, ULong resType, Int resID, ULong size);
+UInt     DmNumDatabases(UInt cardNo);
+UInt     DmNumRecords(DmOpenRef dbR);
+UInt     DmNumRecordsInCategory(DmOpenRef dbR, UInt category);
+UInt     DmNumResources(DmOpenRef dbR);
+DmOpenRef DmOpenDatabase(UInt cardNo, LocalID dbID, UInt mode);
+DmOpenRef DmOpenDatabaseByTypeCreator(ULong type, ULong creator, UInt mode);
+Err      DmOpenDatabaseInfo(DmOpenRef dbR, LocalID* dbIDP, UIntPtr openCountP, UIntPtr modeP, UIntPtr cardNoP, BooleanPtr resDBP);
+UInt     DmPositionInCategory(DmOpenRef dbR, UInt index, UInt category);
+VoidHand DmQueryNextInCategory(DmOpenRef dbR, UIntPtr indexP, UInt category);
+VoidHand DmQueryRecord(DmOpenRef dbR, UInt index);
+//Err      DmQuickSort(DmOpenRef dbR, DmComparF* compar, Int other);
+Err      DmRecordInfo(DmOpenRef dbR, UInt index, WordPtr attr, ULongPtr uniqueIDP, LocalID* chunkIDP);
+Err      DmResourceInfo(DmOpenRef dbR, Int index, ULongPtr resTypeP, IntPtr resIDP, LocalID* chunkLocalIDP);
+Err      DmReleaseRecord(DmOpenRef dbR, UInt index, Boolean dirty);
+Err      DmReleaseResource(VoidHand resourceH);
+Err      DmRemoveRecord(DmOpenRef dbR, UInt index);
+Err      DmRemoveResource(DmOpenRef dbR, Int index);
+Err      DmRemoveSecretRecords(DmOpenRef dbR);
+Err      DmResetRecordStates(DmOpenRef dbR);
+VoidHand DmResizeRecord(DmOpenRef dbR, UInt index, ULong newSize);
+VoidHand DmResizeResource(VoidHand resourceH, ULong newSize);
+Int      DmSearchRecord(VoidHand recH, DmOpenRef* dbRP);
+Int      DmSearchResource(ULong resType, Int resId, VoidHand resH, DmOpenRef* dbRP);
+Err      DmSeekRecordInCategory(DmOpenRef dbR, UIntPtr indexP, Int offset, Int direction, UInt category);
+Err      DmSet(VoidPtr recordP, ULong offset, ULong bytes, Byte value);
+Err      DmSetDatabaseInfo(UInt cardNo, LocalID dbID, CharPtr nameP, UIntPtr attributesP, UIntPtr versionP, ULongPtr crDateP, ULongPtr modDateP, ULongPtr bckUpDateP, ULongPtr modNumP, LocalID* appInfoIDP, LocalID* sortInfoIDP, ULongPtr typeP, ULongPtr creatorP);
+Err      DmSetRecordInfo(DmOpenRef dbR, UInt index, WordPtr attr, ULongPtr uniqueIDP);
+Err      DmSetResourceInfo(DmOpenRef dbR, Int index, ULongPtr resTypeP, IntPtr resIDP);
+Err      DmStrCopy(VoidPtr recordP, ULong offset, CharPtr src);
+Err      DmWrite(VoidPtr recordP, ULong ofset, VoidPtr src, ULong bytes);
+// overloaded methods: recordP as int, consistent with rest of package
+Err      DmWrite(voidptr recordP, ULong offset, VoidPtr src, ULong bytes);
+Err      DmWrite(VoidPtr recordP, ULong offset, ByteArray src, ULong bytes);
+Err      DmWrite(voidptr recordP, ULong offset, ByteArray src, ULong bytes);
+Err      DmWriteCheck(VoidPtr recordP, ULong ofset, ULong bytes);
+palmos 2.0
+Err      DmDeleteCategory(DmOpenRef dbR, UInt categoryNum);
+
+//err
+palmos 1.0
+//void     ErrDisplay(CharPtr message);
+void     ErrDisplayFileLineMsg(CharPtr filename, UInt lineno, CharPtr msg);
+//void     ErrFatalDisplayIf(Boolean condition, CharPtr message);
+//void     ErrNonFatalDisplayIf(Boolean condition, CharPtr message);
+//void     ErrThrow(Long err);
+
+//evt
+palmos 1.0
+void     EvtAddEventToQueue(EventPtr event);
+void     EvtCopyEvent(EventPtr source, EventPtr dest);
+Err      EvtDequeuePenPoint(PointType* retP);
+Err      EvtDequeuePenStrokeInfo(PointType* startPtP, PointType* endPtP);
+void     EvtEnableGraffiti(Boolean enable);
+Err      EvtEnqueueKey(UInt ascii, UInt keycode, UInt modifiers);
+Err      EvtFlushKeyQueue();
+Err      EvtFlushNextPenStroke();
+Err      EvtFlushPenQueue();
+void     EvtGetEvent(EventPtr event, Long timeout);
+void     EvtGetPen(SWord* pScreenX, SWord* pScreenY, Boolean* pPenDown);
+//PenBtnInfoPtr  EvtGetPenBtnList(UIntPtr numButtons);
+Boolean  EvtKeyQueueEmpty();
+ULong    EvtKeyQueueSize();
+ULong    EvtPenQueueSize();
+Err      EvtProcessSoftKeyStroke(PointType* startPtP, PointType* endPtP);
+Word     EvtResetAutoOffTimer();
+Err      EvtWakeup();
+palmos 2.0
+Boolean  EvtEventAvail();
+
+//exp expansion manager
+palmos 1.0 Expansion Manager Feature Set
+Err ExpInit() = sysTrapExpansionDispatch selector expInit;
+Err ExpSlotDriverInstall(UInt32 dbCreator, UIntPtr slotLibRefNumP) = sysTrapExpansionDispatch selector expSlotDriverInstall;
+Err ExpSlotDriverRemove(UInt16 slotLibRefNum) = sysTrapExpansionDispatch selector expSlotDriverRemove;
+Err ExpSlotLibFind(UInt16 slotRefNum, UIntPtr slotLibRefNum) = sysTrapExpansionDispatch selector expSlotLibFind;
+Err ExpSlotRegister(UInt16 slotLibRefNum, UIntPtr slotRefNum) = sysTrapExpansionDispatch selector expSlotRegister;
+Err ExpSlotUnregister(UInt16 slotRefNum) = sysTrapExpansionDispatch selector expSlotUnregister;
+Err ExpCardInserted(UInt16 slotRefNum) = sysTrapExpansionDispatch selector expCardInserted;
+Err ExpCardRemoved(UInt16 slotRefNum) = sysTrapExpansionDispatch selector expCardRemoved;
+Err ExpCardPresent(UInt16 slotRefNum) = sysTrapExpansionDispatch selector expCardPresent;
+// Err ExpCardInfo(UInt16 slotRefNum, ExpCardInfoType* infoP) = sysTrapExpansionDispatch selector expCardInfo;
+Err ExpSlotEnumerate(UIntPtr slotRefNumP, ULongPtr slotIteratorP) = sysTrapExpansionDispatch selector expSlotEnumerate;
+Err ExpCardGetSerialPort(UInt16 slotRefNum, ULongPtr portP) = sysTrapExpansionDispatch selector expCardGetSerialPort;
+
+//find
+palmos 1.0
+//Boolean  FindDrawHeader(FindParamsPtr params, CharPtr title);
+//void     FindGetLineBounds(FindParamsPtr params, RectanglePtr r);
+//void     FindSaveMatch(FindParamsPtr params, UInt recordNum, Word pos, UInt fieldNum, DWord appCustom, UInt dbCardNo, LocalID rdbID);
+void     FindStrInStr(CharPtr strToSearch, CharPtr strToFind, WordPtr posP);
+
+//fld
+palmos 1.0
+Word     FldCalcFieldHeight(CharPtr chars, Word maxWidth);
+void     FldCompactText(FieldPtr fld);
+void     FldCopy(FieldPtr fld);
+void     FldCut(FieldPtr fld);
+void     FldDelete(FieldPtr fld, Word start, Word end);
+Boolean  FldDirty(FieldPtr fld);
+void     FldDrawField(FieldPtr fld);
+void     FldEraseField(FieldPtr fld);
+void     FldFreeMemory(FieldPtr fld);
+void     FldGetAttributes(FieldPtr fld, FieldAttrPtr attrP);
+void     FldGetBounds(FieldPtr fld, RectanglePtr rect);
+FontID   FldGetFont(FieldPtr fld);
+Word     FldGetInsPtPosition(FieldPtr fld);
+Word     FldGetMaxChars(FieldPtr fld);
+Word     FldGetScrollPosition(FieldPtr fld);
+void     FldGetScrollValues(FieldPtr fld, WordPtr scrollPos, WordPtr textHeight, WordPtr fieldHeight);
+void     FldGetSelection(FieldPtr fld, WordPtr startPosition, WordPtr endPosition);
+Word     FldGetTextAllocatedSize(FieldPtr fld);
+Handle   FldGetTextHandle(FieldPtr fld);
+Word     FldGetTextHeight(FieldPtr fld);
+Word     FldGetTextLength(FieldPtr fld);
+CharPtr  FldGetTextPtr(Handle fld);
+Word     FldGetVisibleLines(FieldPtr fld);
+void     FldGrabFocus(FieldPtr fld);
+Boolean  FldHandleEvent(FieldPtr fld, EventPtr EventP);
+Boolean  FldInsert(FieldPtr fld, CharPtr insertChars, Word insertLen);
+Boolean  FldMakeFullyVisible(FieldPtr fld);
+void     FldPaste(FieldPtr field);
+void     FldRecalculateField(FieldPtr fld, Boolean redraw);
+void     FldReleaseFocus(FieldPtr fld);
+Boolean  FldScrollable(FieldPtr fld, DirectionType direction);
+void     FldScrollField(FieldPtr fld, Word linesToScroll, DirectionType direction);
+void     FldSendChangeNotification(FieldPtr fld);
+void     FldSendHeightChangeNotification(FieldPtr fld);
+void     FldSetAttributes(FieldPtr fld, FieldAttrPtr attrP);
+void     FldSetBounds(FieldPtr fld, RectanglePtr rect);
+void     FldSetDirty(FieldPtr fld, Boolean dirty);
+void     FldSetFont(FieldPtr fld, FontID fontID);
+void     FldSetInsPtPosition(FieldPtr fld, Word pos);
+void     FldSetMaxChars(FieldPtr fld, Word maxChars);
+void     FldSetScrollPosition(FieldPtr fld, Word pos);
+void     FldSetSelection(FieldPtr fld, Word startPosition, Word endPosition);
+void     FldSetText(FieldPtr fld, VoidHand textHandle, Word offset, Word size);
+void     FldSetTextAllocatedSize(FieldPtr fld, Word allocatedSize);
+void     FldSetTextHandle(FieldPtr fld, Handle textHandle);
+void     FldSetTextPtr(FieldPtr fld, CharPtr textP);
+void     FldSetUsable(FieldPtr fld, Boolean usable);
+void     FldUndo(FieldPtr fld);
+Word     FldWordWrap(CharPtr chars, Word maxWidth);
+// New Field additions - RCM 7/24/02
+palmos 3.0
+FieldPtr FldNewField (Ptr formPP, UInt16 id, Coord x, Coord y, Coord width, Coord height, FontID font, UInt32 maxChars, Boolean editable, Boolean underlined, Boolean singleLine, Boolean dynamicSize, JustificationType justification, Boolean autoShift, Boolean hasScrollBar, Boolean numeric);
+
+//fnt
+palmos 1.0
+//short    FntAccentHeight();
+//short    FntAscent();
+short    FntAverageCharWidth();
+short    FntBaseLine();
+short    FntCharHeight();
+void     FntCharsInWidth(CharPtr string, Int* stringWidthP, Int* stringLengthP, Boolean* fitWithinWidth);
+short    FntCharsWidth(CharPtr chars, Word length);
+short    FntCharsWidth(CharPtr+ chars, Word length);
+short    FntCharsWidth(ByteArray chars, Word length);
+short    FntCharsWidth(CharArray chars, Word length);
+short    FntCharWidth(byte ch);
+Err      FntDefineFont (FontID font, FontPtr fontP);
+short    FntDescenderHeight();
+FontID   FntGetFont();
+FontPtr  FntGetFontPtr();
+short    FntLineHeight();
+short    FntLineWidth(CharPtr chars, Word length);
+short    FntLineWidth(CharPtr+ chars, Word length);
+short    FntLineWidth(const ByteArray chars, Word length);
+short    FntLineWidth(const CharArray chars, Word length);
+//Boolean  FntProportionalFont();
+FontID   FntSetFont(FontID fontID);
+
+// font extensions
+palmos 1.0
+FontID FontSelect (FontID fontID);
+
+//fpl
+palmos 1.0
+//not supported
+
+//frm
+palmos 1.0
+Word     FrmAlert(Word alertId);
+void     FrmCloseAllForms();
+void     FrmCopyLabel(FormPtr frm, Word labelID, CharPtr newLabel);
+void     FrmCopyTitle(FormPtr frm, CharPtr newTitle);
+Word     FrmCustomAlert(Word alertId, CharPtr s1, CharPtr s2, CharPtr s3);
+void     FrmDeleteForm(FormPtr frm);
+Boolean  FrmDispatchEvent(EventPtr eventP);
+Word     FrmDoDialog(FormPtr frm);
+void     FrmDrawForm(FormPtr frm);
+void     FrmEraseForm(FormPtr frm);
+FormPtr  FrmGetActiveForm();
+Word     FrmGetActiveFormID();
+Byte     FrmGetControlGroupSelection(FormPtr frm, Byte groupNum);
+short    FrmGetControlValue(FormPtr frm, Word objIndex);
+FormPtr  FrmGetFirstForm();
+Word     FrmGetFocus(FormPtr frm);
+void     FrmGetFormBounds(FormPtr frm, RectanglePtr r);
+Word     FrmGetFormId(FormPtr frm);
+FormPtr  FrmGetFormPtr(Word formId);
+VoidPtr  FrmGetGadgetData(FormPtr frm, Word objIndex);
+CharPtr  FrmGetLabel(FormPtr frm, Word labelID);
+Word     FrmGetNumberOfObjects(FormPtr frm);
+void     FrmGetObjectBounds(FormPtr frm, Word ObjIndex, RectanglePtr r);
+Word     FrmGetObjectId(FormPtr frm, Word objIndex);
+Word     FrmGetObjectIndex(FormPtr frm, Word objID);
+void     FrmGetObjectPosition(FormPtr frm, Word objIndex, SWordPtr x, SWordPtr y);
+Handle   FrmGetObjectPtr(FormPtr frm, Word objIndex);
+FormObjectKind FrmGetObjectType(FormPtr frm, Word objIndex);
+CharPtr  FrmGetTitle(FormPtr frm);
+Boolean  FrmGetUserModifiedState(FormPtr frm);
+WinHandle FrmGetWindowHandle(FormPtr frm);
+void     FrmGotoForm(Word formId);
+Boolean  FrmHandleEvent(FormPtr frm, EventPtr event);
+void     FrmHelp(Word helpMsgId);
+void     FrmHideObject(FormPtr frm, Word objIndex);
+FormPtr  FrmInitForm(Word rscID);
+void     FrmPopupForm(Word formId);
+void     FrmReturnToForm(Word formId);
+void     FrmSaveAllForms();
+void     FrmSetActiveForm(FormPtr formptr);
+void     FrmSetCategoryLabel(FormPtr formptr, Word objIndex, CharPtr newLabel);
+void     FrmSetControlGroupSelection(FormPtr formptr, Byte groupNum, Word controlID);
+void     FrmSetControlValue(FormPtr formptr, Word objIndex, short newValue);
+void     FrmSetEventHandler(FormPtr formptr, const FormEventHandlerPtr handler);
+void     FrmSetFocus(FormPtr frm, Word objIndex);
+void     FrmSetGadgetData(FormPtr frm, Word objIndex, VoidPtr data);
+void     FrmSetNotUserModified(FormPtr frm);
+void     FrmSetObjectPosition(FormPtr frm, Word objIndex, SWord x, SWord y);
+void     FrmSetTitle(FormPtr frm, CharPtr newTitle);
+void     FrmShowObject(FormPtr frm, Word objIndex);
+void     FrmUpdateScrollers(FormPtr frm, Word upIndex, Word downIndex, Boolean scrollableUp, Boolean scrollableDown);
+void     FrmUpdateForm(Word formId, Word updateCode);
+Boolean  FrmVisible(FormPtr frm);
+// New Form additions - RCM 7/24/02
+palmos 3.0
+FormPtr  FrmNewForm (Word formID, CharPtr titleStrP, Coord x, Coord y, Coord width, Coord height, Boolean modal, Word defaultButton, Word helpRscID, Word menuRscID);
+Boolean  FrmValidatePtr (FormPtr formP);
+
+//ftr
+palmos 1.0
+java
+        /** value of creator for FtrGet */
+        public static final int sysFtrCreator = ((int)'p'<<24)|((int)'s'<<16)|((int)'y'<<8)|(int)'s';
+        public static final int sysFtrNumROMVersion     = 1;
+        public static final int sysFtrNumBacklight = 3;
+        public static final int sysFtrNumEncryption = 4;
+        public static final int sysFtrNumCountry = 5;
+        public static final int sysFtrNumLanguage = 6;
+        public static final int sysFtrNumDisplayDepth = 7;
+        public static final int sysFtrNumIntlMgr = 10;
+        public static final int sysFtrNumEncoding = 11;
+        public static final int sysFtrDefaultFont = 12;
+        public static final int sysFtrDefaultBoldFont = 13;
+        public static final int sysFtrNumGremlinsSupportGlobals = 14;
+        public static final int sysFtrNumVendor = 15;
+        public static final int sysFtrNumCharEncodingFlags = 16;
+        public static final int sysFtrNumNotifyMgrVersion = 17;
+        public static final int sysFtrNumOEMROMVersion = 18;
+        public static final int sysFtrNumErrorCheckLevel = 19;
+        public static final int sysFtrNumOEMCompanyID = 20;
+        public static final int sysFtrNumOEMDeviceID = 21;
+        public static final int sysFtrNumOEMHALID = 22;
+        public static final int sysFtrNumDefaultCompression = 23;
+        public static final int sysFtrNumWinVersion = 24;
+        public static final int sysFtrNumAccessorTrapPresent = 25;
+        public static final int sysFtrNumInputAreaFlags = 26;
+        /** value of creator for FtrGet */
+        public static final int sysFileCSerialMgr = ((int)'s'<<24)|((int)'m'<<16)|((int)'g'<<8)|(int)'r';
+        public static final int sysFtrNewSerialPresent = 1;
+        public static final int sysFtrNewSerialVersion = 2;
+        /** value of creator for FtrGet */
+        public static final int sysFileCExpansionMgr = ((int)'e'<<24)|((int)'x'<<16)|((int)'p'<<8)|(int)'n';
+        public static final int expFtrIDVersion = 0;
+        /** value of creator for FtrGet */
+        public static final int sysFileCVFSMgr = ((int)'v'<<24)|((int)'f'<<16)|((int)'s'<<8)|(int)'m';
+        public static final int vfsFtrIDVersion = 0;
+        public static final int vfsFtrIDDefaultFS = 1;
+        /** value of creator for FtrGet */
+        public static final int netFtrCreator = ((int)'n'<<24)|((int)'e'<<16)|((int)'t'<<8)|(int)'l';
+        public static final int netFtrNumVersion = 0;
+endjava
+Err      FtrGet(DWord creator, UInt featureNum, DWordPtr value);
+Err      FtrGet(DWord creator, UInt featureNum, IntArray value);
+Err      FtrGetByIndex(UInt index, Boolean romTable, DWordPtr creatorP, UIntPtr numP, DWordPtr valueP);
+Err      FtrSet(DWord creator, UInt featureNum, DWord newValue);
+Err      FtrUnregister(DWord creator, UInt featureNum);
+
+//getchar
+palmos 1.0
+//not supported
+
+//grf
+palmos 1.0
+Err      GrfAddMacro(CharPtr nameP, VoidPtr macroDataP, Word dataLen);
+Err      GrfAddPoint(PointType* ptP);
+Err      GrfCleanState();
+Err      GrfDeleteMacro(Word index);
+Err      GrfFindBranch(Word flags);
+Err      GrfFilterPoints();
+Err      GrfFlushPoints();
+Err      GrfGetAndExpandMacro(CharPtr nameP, VoidPtr macroDataP, WordPtr dataLenP);
+Err      GrfGetGlyphMapping(Word glyphID, WordPtr flagsP, void* dataPtrP, WordPtr dataLenP, WordPtr uncertainLenP);
+Err      GrfGetMacro(CharPtr nameP, VoidPtr macroDataP, WordPtr dataLenP);
+Err      GrfGetMacroName(Word index, CharPtr nameP);
+Err      GrfGetNumPoints(WordPtr numPtsP);
+Err      GrfGetPoint(Word index, PointType* pointP);
+Err      GrfGetState(Boolean* capsLockP, Boolean* numLockP, WordPtr tempShiftP, Boolean* autoShiftedP);
+Err      GrfInitState();
+//Err      GrfMatch(WordPtr flagsP, void* dataPtrP, WordPtr dataLenP, WordPtr uncertainLenP, GrfMatchInfoPtr matchInfoP);
+//Err      GrfMatchGlyph(GrfMatchInfoPtr matchInfoP, Word maxUncertainty, Word maxMatches);
+Err      GrfProcessStroke(PointType* startPtP, PointType* endPtP, Boolean upShift);
+Err      GrfSetState(Boolean capsLock, Boolean numLock, Boolean upperShift);
+//void     SysGrfShortCutListDialog();
+
+//gsi
+palmos 1.0
+void     GsiEnable(Boolean enableIt);
+Boolean  GsiEnabled();
+void     GsiInitialize();
+void     GsiSetLocation(short x, short y);
+void     GsiSetShiftState(Word lockFlags, Word tempShift);
+
+//hwr (RCM)
+palmos 1.0
+javadoc <P>Only for OS 3.5 and earlier
+Boolean  HwrBacklight(Boolean set, Boolean newState);
+palmos 3.5
+Err      HwrDisplayAttributes(Boolean set, UInt8 hwrDisplayAttrType, VoidPtr dataP);
+
+//inspt
+palmos 1.0
+void     InsPtEnable(Boolean enableIt);
+Boolean  InsPtEnabled();
+short    InsPtGetHeight();
+void     InsPtGetLocation(shortPtr x, shortPtr y);
+void     InsPtSetHeight(short height);
+void     InsPtSetLocation(short x, short y);
+
+//key
+palmos 1.0
+DWord    KeyCurrentState();
+Err      KeyRates(Boolean set, WordPtr initDelayP, WordPtr periodP, WordPtr doubleTapDelayP, BooleanPtr queueAheadP);
+
+//lst
+palmos 1.0
+void     LstDrawList(ListPtr ListP);
+void     LstEraseList(ListPtr ListP);
+Word     LstGetNumberOfItems(ListPtr ListP);
+Word     LstGetSelection(ListPtr ListP);
+CharPtr  LstGetSelectionText(ListPtr ListP, Word itemNum);
+Boolean  LstHandleEvent(ListPtr ListP, EventPtr pEvent);
+void     LstMakeItemVisible(ListPtr ListP, Word itemNum);
+short    LstPopupList(ListPtr ListP);
+//void     LstSetDrawFunction(ListPtr ListP, ListDrawDataFuncPtr func);
+void     LstSetHeight(ListPtr ListP, Word visibleItems);
+void     LstSetListChoices(ListPtr ListP, char** itemsText, UInt numItems);
+void     LstSetPosition(ListPtr ListP, short x, short y);
+void     LstSetSelection(ListPtr ListP, Word itemNum);
+void     LstSetTopItem(ListPtr ListP, UInt itemNum);
+
+//mem
+palmos 1.0
+Err      MemCardInfo(UInt cardNo, CharBuf cardNameP, CharBuf manufNamP, UIntPtr versionP, ULongPtr crDateP, ULongPtr romSizeP, ULongPtr ramSizeP, ULongPtr freeBytesP);
+Err      MemChunkFree(voidptr chunkDataP);
+Word     MemDebugMode();
+Boolean  MemHandleDataStorage(VoidHand h);
+UInt     MemHandleCardNo(VoidHand h);
+Err      MemHandleFree(VoidHand h);
+UInt     MemHandleHeapID(VoidHand h);
+VoidPtr  MemHandleLock(VoidHand h);
+VoidHand MemHandleNew(ULong size);
+Err      MemHandleResize(VoidHand h, ULong newSize);
+ULong    MemHandleSize(VoidHand h);
+LocalID  MemHandleToLocalID(VoidHand h);
+Err      MemHandleUnlock(VoidHand h);
+Err      MemHeapCheck(UInt heapID);
+Err      MemHeapCompact(UInt heapID);
+Boolean  MemHeapDynamic(UInt heapID);
+UInt     MemHeapFlags(UInt heapID);
+Err      MemHeapFreeBytes(UInt heapID, ULongPtr freeP, ULongPtr maxP);
+UInt     MemHeapID(UInt cardNo, UInt heapIndex);
+Err      MemHeapScramble(UInt heapID);
+ULong    MemHeapSize(UInt heapID);
+LocalIDKind MemLocalIDKind(LocalID local);
+VoidPtr  MemLocalIDToGlobal(LocalID local, UInt cardNo);
+VoidPtr  MemLocalIDToLockedPtr(LocalID local, UInt cardNo);
+VoidPtr  MemLocalIDToPtr(LocalID local, UInt cardNo);
+Err      MemMove(voidptr dst, voidptr src, ULong numBytes);
+// overloaded methods with java.lang.Object source or dest
+Err      MemMove(VoidPtr dst, voidptr src, ULong numBytes);
+Err      MemMove(voidptr dst, VoidPtr src, ULong numBytes);
+Err      MemMove(VoidPtr dst, VoidPtr src, ULong numBytes);
+Err      MemMove(ByteArray dst, ByteArray src, ULong numBytes);
+Err      MemMove(voidptr dst, ByteArray src, ULong numBytes);
+Err      MemMove(ByteArray dst, voidptr src, ULong numBytes);
+Err      MemMove(CharBuf dst, voidptr src, ULong numBytes);
+Err      MemMove(voidptr dst, CharPtr src, ULong numBytes);
+UInt     MemNumCards();
+UInt     MemNumHeaps(UInt cardNo);
+UInt     MemNumRAMHeaps(UInt cardNo);
+UInt     MemPtrCardNo(voidptr chunkP);
+Boolean  MemPtrDataStorage(voidptr p);
+Err      MemPtrFree(voidptr p);
+UInt     MemPtrHeapID(voidptr p);
+LocalID  MemPtrToLocalID(voidptr chunkP);
+VoidPtr  MemPtrNew(ULong size);
+VoidHand MemPtrRecoverHandle(voidptr p);
+Err      MemPtrSetOwner(DWord ptr, int owner);
+Err      MemPtrResize(voidptr p, ULong newSize);
+// overloaded methods with java.lang.Object source or dest
+Err      MemSet(voidptr dst, ULong numBytes, Byte value);
+Err      MemSet(ByteArray dst, ULong numBytes, Byte value);
+Err      MemSetDebugMode(Word flags);
+ULong    MemPtrSize(voidptr p);
+Err      MemPtrUnlock(voidptr p);
+Err      MemStoreInfo(UInt cardNo, UInt storeNumber, UIntPtr versionP, UIntPtr flagsP, CharBuf nameP, ULongPtr crDateP, ULongPtr bckUpDateP, ULongPtr heapListOffsetP, ULongPtr initCodeOffset1P, ULongPtr initCodeOffset2P, LocalID* databaseDirIDP);
+
+//menu
+palmos 1.0
+void     MenuDispose(MenuBarPtr MenuP);
+void     MenuDrawMenu(MenuBarPtr MenuP);
+void     MenuEraseStatus(MenuBarPtr MenuP);
+MenuBarPtr MenuGetActiveMenu();
+Boolean  MenuHandleEvent(MenuBarPtr MenuP, EventPtr event, WordPtr error);
+MenuBarPtr MenuInit(Word resourceId);
+MenuBarPtr MenuSetActiveMenu(MenuBarPtr MenuP);
+
+//misc
+palmos 1.0
+void     AbtShowAbout(ULong creator);
+Word     Crc16CalcBlock(VoidPtr bufP, UInt count, Word crc);
+Boolean  DayHandleEvent(DaySelectorPtr pSelector, EventPtr pEvent);
+
+//netlib (RCM)
+palmos 1.0
+Err      &NetLibOpen(UInt16 libRefnum, ErrPtr netIFErrsP);
+Err      &NetLibOpenCount(UInt16 libRefnum, WordPtr countP);
+Err      &NetLibClose(UInt16 libRefnum, UInt16 immediate);
+Err      &NetLibConnectionRefresh(UInt16 libRefnum, Boolean refresh, UBytePtr allUp, ErrPtr errP);
+Err      &NetLibSleep(UInt16 libRefnum);
+Err      &NetLibWake(UInt16 libRefnum);
+NetSocketRef &NetLibSocketOpen(UInt16 libRefnum, NetSocketAddrEnum domain, NetSocketTypeEnum type, Int16 protocol, Int32 timeout, ErrPtr errP);
+Err      &NetLibSocketClose(UInt16 libRefnum, NetSocketRef socket, Int32 timeout, ErrPtr errP);
+Err      &NetLibSocketOptionGet(UInt16 libRefnum, NetSocketRef socket, NetSocketOptLevelEnum level, NetSocketOptEnum option, VoidPtr optValueP, UIntPtr optValueLenP, Int32 timeout, ErrPtr errP);
+Err      &NetLibSocketOptionSet(UInt16 libRefnum, NetSocketRef socket, NetSocketOptLevelEnum level, NetSocketOptEnum option, VoidPtr optValueP, UInt16 optValueLen, Int32 timeout, ErrPtr errP);
+Err      &NetLibSocketConnect(UInt16 libRefnum, NetSocketRef socket, NetSocketAddrTypePtr sockAddrP, Int16 addrLen, Int32 timeout, ErrPtr errP);
+Err      &NetLibSocketBind(UInt16 libRefnum, NetSocketRef socket, NetSocketAddrTypePtr sockAddrP, Int16 addrLen, Int32 timeout, ErrPtr errP);
+Err      &NetLibSocketListen(UInt16 libRefnum, NetSocketRef socket, UInt16 queueLen, Int32 timeout, ErrPtr errP);
+Err      &NetLibSocketAccept(UInt16 libRefnum, NetSocketRef socket, NetSocketAddrTypePtr sockAddrP, UIntPtr addrLenP, Int32 timeout, ErrPtr errP);
+Err      &NetLibSocketShutdown(UInt16 libRefnum, NetSocketRef socket, Int16 direction, Int32 timeout, ErrPtr errP);
+Err      &NetLibSend(UInt16 libRefNum, NetSocketRef socket, ByteArray bufP, UInt16 bufLen, UInt16 flags, UInt32 toAddrP, UInt16 toLen, Int32 timeout, ErrPtr errP);
+Err      &NetLibSend(UInt16 libRefNum, NetSocketRef socket, ByteArray bufP, UInt16 bufLen, UInt16 flags,NetSocketAddrTypePtr toAddrP, UInt16 toLen, Int32 timeout, ErrPtr errP);
+Err      &NetLibReceive(UInt16 libRefNum, NetSocketRef socket, ByteArray bufP, UInt16 bufLen, UInt16 flags, UInt32 fromAddrP, UInt32 fromLenP, Int32 timeout, ErrPtr errP);
+Err      &NetLibReceive(UInt16 libRefNum, NetSocketRef socket, ByteArray bufP, UInt16 bufLen, UInt16 flags, NetSocketAddrTypePtr fromAddrP, UIntPtr fromLenP, Int32 timeout, ErrPtr errP);
+CharPtr  &NetLibAddrINToA(UInt16 libRefnum, NetIPAddr inet, CharBuf addressStr);
+NetIPAddr &NetLibAddrAToIN(UInt16 libRefnum, CharPtr addressStr);
+// Ptr &NetLibGetHostByName(UInt16 libRefNum, CharPtr nameP, NetHostInfoBufPtr bufP, Int32 timeout, ErrPtr errP);
+Ptr &NetLibGetHostByName(UInt16 libRefNum, CharPtr nameP, IntArray bufP, Int32 timeout, ErrPtr errP);
+
+//pce
+palmos 5.0
+UInt32 PceNativeCall(voidptr nativeFuncP, voidptr userDataP);
+
+//pen
+palmos 1.0
+Err      PenCalibrate(PointType* digTopLeftP, PointType* digBotRightP, PointType* scrTopLeftP, PointType* scrBotRightP);
+Err      PenResetCalibration();
+
+//pref
+palmos 1.0
+Boolean  PrefGetAppPreferences(ULong type, Int version, VoidPtr prefs, Word prefsSize) = sysTrapPrefGetAppPreferencesV10;
+void     PrefGetPreferences(SystemPreferencesPtr p);
+DmOpenRef PrefOpenPreferenceDB() = sysTrapPrefOpenPreferenceDBV10;
+void     PrefSetAppPreferences(ULong type, Int version, VoidPtr prefs, Word prefsSize) = sysTrapPrefSetAppPreferencesV10;
+void     PrefSetPreferences(SystemPreferencesPtr p);
+// RCM - Added version 2 Get/Set user app preferences
+palmos 2.0
+Int16    PrefGetAppPreferences(UInt32 creator, UInt16 id, VoidPtr prefs, UIntPtr prefsSize, Boolean saved);
+void     PrefSetAppPreferences(UInt32 creator, UInt16 id, Int16 version, VoidPtr prefs, UInt16 prefsSize, Boolean saved);
+UInt32   PrefGetPreference(Enum pref);
+
+//psr
+palmos 1.0
+//not supported
+
+//scl - scroll
+palmos 1.0
+void     SclDrawScrollBar(ScrollBarPtr scrlPtr);
+void     SclGetScrollBar(ScrollBarPtr scrlPtr, WordPtr value, WordPtr min, WordPtr max, WordPtr pageSize);
+Boolean  SclHandleEvent(ScrollBarPtr scrlPtr, EventPtr event);
+void     SclSetScrollBar(ScrollBarPtr scrlPtr, Word value, Word min, Word max, Word pageSize);
+
+//ser ("Old serial functions") RCM
+palmos 1.0
+Err      &SerOpen(UInt refNum, UInt port, ULong baud);
+Err      &SerClose(UInt refNum);
+Err      &SerSleep(UInt refNum);
+Err      &SerWake(UInt refNum);
+Err      &SerGetSettings(UInt refNum, SerSettingsPtr settingsP);
+Err      &SerSetSettings(UInt refNum, SerSettingsPtr settingsP);
+Word     &SerGetStatus(UInt refNum, BooleanPtr ctsOnP, BooleanPtr dtsOnP);
+Err      &SerClearErr(UInt refNum);
+Err      &SerSend(UInt refNum, const ByteArray bufP, ULong size) = sysLibTrapSerSend10;
+Err      &SerSend(UInt refNum, VoidPtr bufP, ULong size) = sysLibTrapSerSend10;
+Err      &SerSend10(UInt refNum, ByteArray bufP, ULong size);
+Err      &SerSend10(UInt refNum, VoidPtr bufP, ULong size);
+Err      &SerSendWait(UInt refNum, Long timeout);
+Err      &SerSendCheck(UInt refNum, ULongPtr numBytesP);
+Err      &SerSendFlush(UInt refNum);
+Err      &SerReceive(UInt refNum, ByteArray bufP, ULong bytes, Long timeout) = sysLibTrapSerReceive10;
+Err      &SerReceive(UInt refNum, VoidPtr bufP, ULong bytes, Long timeout) = sysLibTrapSerReceive10;
+Err      &SerReceive10(UInt refNum, ByteArray bufP, ULong bytes, Long timeout);
+Err      &SerReceive10(UInt refNum, VoidPtr bufP, ULong bytes, Long timeout);
+Err      &SerReceiveWait(UInt refNum, ULong bytes, Long timeout);
+Err      &SerReceiveCheck(UInt refNum, ULongPtr numBytesP);
+void     &SerReceiveFlush(UInt refNum, Long timeout);
+Err      &SerSetReceiveBuffer(UInt refNum, VoidPtr bufP, UInt bufSize);
+Err      &SerReceiveWindowOpen(UInt refNum, ByteArray bufPP, ULongPtr sizeP);
+Err      &SerReceiveWindowClose(UInt refNum, ULong bytesPulled);
+//Err      SerSetWakeupHandler(UInt refNum, SerWakeupHandlerPtr procP, ULongPtr refCon);
+Err      &SerPrimeWakeupHandler(UInt refNum, UInt minBytes);
+Err      &SerControl(UInt refNum, UInt op, VoidPtr valueP, UIntPtr valueLenP);
+Err      &SerControl(UInt refNum, UInt op, ULong valueP, ULong valueLenP);
+palmos 2.0
+ULong    &SerSend(UInt refNum, ByteArray bufP, ULong count, ErrPtr errP);
+ULong    &SerSend(UInt refNum, VoidPtr bufP, ULong count, ErrPtr errP);
+ULong    &SerReceive(UInt refNum, ByteArray bufP, ULong count, Long timeout, ErrPtr errP);
+ULong    &SerReceive(UInt refNum, VoidPtr bufP, ULong count, Long timeout, ErrPtr errP);
+palmos 1.0
+
+//slk
+palmos 1.0
+Err      SlkClose();
+Err      SlkCloseSocket(UInt socket);
+Err      SlkFlushSocket(UInt socket, Long timeout);
+Err      SlkOpen();
+Err      SlkOpenSocket(UInt libRefNum, UIntPtr socketP, Boolean staticSocket);
+Err      SlkReceivePacket(UInt socket, Boolean andOtherSockets, SlkPktHeaderPtr headerP, void* bodyP, UInt bodySize, Long timeout);
+//Err      SlkSendPacket(SlkPktHeaderPtr headerP, SlkWriteDataPtr writeList);
+//Err      SlkSetSocketListener(UInt socket, SlkSocketListenPtr socketP);
+Err      SlkSocketRefNum(UInt socket, UIntPtr refNumP);
+Err      SlkSocketSetTimeout(UInt socket, Long timeout);
+
+//snd
+palmos 1.0
+Err      SndDoCmd(VoidPtr chanP, SndCommandPtr cmdP, Boolean noWait);
+void     SndGetDefaultVolume(UIntPtr alarmAmpP, UIntPtr sysAmpP, UIntPtr defAmpP);
+void     SndPlaySystemSound(SndSysBeepType beepID);
+void     SndSetDefaultVolume(UIntPtr alarmAmpP, UIntPtr sysAmpP, UIntPtr defAmpP);
+palmos 3.5 Sound Stream Feature Set
+java
+    /** sound manager feature ID */
+    public final static int sysFileCSoundMgr = ('s'<<24)|('n'<<16)|('d'<<8)|'m';
+    /** get sound manager feature version */
+    public final static int sndFtrIDVersion = 0;
+endjava
+Err      SndPlayResource(voidptr snd, Int32 volume, UInt32 flags);
+
+//srm
+palmos 1.0 New Serial Manager
+Err      SerialMgrInstall() = sysTrapSerialDispatch selector sysSerialInstall;
+Err      SrmOpen(UInt32 port, UInt32 baud, UIntPtr newPortIdP) = sysTrapSerialDispatch selector sysSerialOpen;
+Err      SrmClose(UInt16 portId) = sysTrapSerialDispatch selector sysSerialClose;
+Err      SrmSleep() = sysTrapSerialDispatch selector sysSerialSleep;
+Err      SrmWake() = sysTrapSerialDispatch selector sysSerialWake;
+Err      SrmGetDeviceCount(UIntPtr numOfDevices) = sysTrapSerialDispatch selector sysSerialGetDeviceCount;
+//Err      SrmGetDeviceInfo(UInt32 deviceID, DeviceInfoType* deviceInfo) = sysTrapSerialDispatch selector sysSerialGetDeviceInfo;
+Err      SrmGetStatus(UInt16 portId, ULongPtr statusField, UIntPtr lineErrs) = sysTrapSerialDispatch selector sysSerialGetStatus;
+Err      SrmClearErr(UInt16 portId) = sysTrapSerialDispatch selector sysSerialClearErr;
+Err      SrmControl(UInt16 portId, UInt16 op, voidptr valueP, UIntPtr valueLen) = sysTrapSerialDispatch selector sysSerialControl;
+Err      SrmControl(UInt16 portId, UInt16 op, ULongPtr value, UIntPtr valueLen) = sysTrapSerialDispatch selector sysSerialControl;
+Err      SrmControl(UInt16 portId, UInt16 op, ByteArray value, UIntPtr valueLen) = sysTrapSerialDispatch selector sysSerialControl;
+//Err       SrmCustomControl(UInt16 portId, UInt16 opCode, UInt32 creator, voidptr valueP, UIntPtr valueLenP) = sysTrapSerialDispatch selector sysSerialCustomControl;
+//Err       SrmCustomControl(UInt16 portId, UInt16 opCode, UInt32 creator, ByteArray valueP, UIntPtr valueLenP) = sysTrapSerialDispatch selector sysSerialCustomControl;
+UInt32   SrmSend (UInt16 portId, voidptr bufP, UInt32 count, ErrPtr errP) = sysTrapSerialDispatch selector sysSerialSend;
+UInt32   SrmSend (UInt16 portId, ByteArray bufP, UInt32 count, ErrPtr errP) = sysTrapSerialDispatch selector sysSerialSend;
+Err      SrmSendWait(UInt16 portId) = sysTrapSerialDispatch selector sysSerialSendWait;
+Err      SrmSendCheck(UInt16 portId, ULongPtr numBytesP) = sysTrapSerialDispatch selector sysSerialSendCheck;
+Err      SrmSendFlush(UInt16 portId) = sysTrapSerialDispatch selector sysSerialSendFlush;
+UInt32   SrmReceive(UInt16 portId, voidptr rcvBufP, UInt32 count, Int32 timeout, ErrPtr errP) = sysTrapSerialDispatch selector sysSerialReceive;
+UInt32   SrmReceive(UInt16 portId, ByteArray rcvBufP, UInt32 count, Int32 timeout, ErrPtr errP) = sysTrapSerialDispatch selector sysSerialReceive;
+Err      SrmReceiveWait(UInt16 portId, UInt32 bytes, Int32 timeout) = sysTrapSerialDispatch selector sysSerialReceiveWait;
+Err      SrmReceiveCheck(UInt16 portId,  ULongPtr numBytesP) = sysTrapSerialDispatch selector sysSerialReceiveCheck;
+Err      SrmReceiveFlush(UInt16 portId, Int32 timeout) = sysTrapSerialDispatch selector sysSerialReceiveFlush;
+Err      SrmSetReceiveBuffer(UInt16 portId, ByteArray bufP, UInt16 bufSize) = sysTrapSerialDispatch selector sysSerialSetRcvBuffer;
+Err      SrmSetReceiveBuffer(UInt16 portId, VoidPtr bufP, UInt16 bufSize) = sysTrapSerialDispatch selector sysSerialSetRcvBuffer;
+//Err      SrmReceiveWindowOpen(UInt16 portId, UInt8** bufPP, ULongPtr sizeP) = sysTrapSerialDispatch selector sysSerialRcvWindowOpen;
+Err      SrmReceiveWindowClose(UInt16 portId, UInt32 bytesPulled) = sysTrapSerialDispatch selector sysSerialRcvWindowClose;
+palmos 1.0 New Serial Manager 2.0
+Err      SrmOpenBackground(UInt32 port, UInt32 baud, UIntPtr newPortId) = sysTrapSerialDispatch selector sysSerialOpenBkgnd;
+palmos 4.0 New Serial Manager 2.0
+Err      SrmExtOpen(UInt32 port, SrmOpenConfigPtr config, UInt16 configSize, UIntPtr newPortId) = sysTrapSerialDispatch selector sysSerialOpenV4;
+Err      SrmExtOpenBackground(UInt32 port, SrmOpenConfigPtr config, UInt16 configSize, UIntPtr newPortId) = sysTrapSerialDispatch selector sysSerialOpenBkgndV4;
+Err      SrmSetWakeupHandler(UInt16 portId, const WakeupHandlerProcPtr handler, UInt32 refCon) = sysTrapSerialDispatch selector sysSerialSetWakeupHandler;
+Err      SrmPrimeWakeupHandler(UInt16 portId, UInt16 minBytes) = sysTrapSerialDispatch selector sysSerialPrimeWakeupHandler;
+palmos 1.0
+
+//str
+palmos 1.0
+Int      StrAToI(CharPtr str);
+//StrCat not supported
+Int      StrCaselessCompare(CharPtr s1, CharPtr s2);
+//StrChr not supported
+Int      StrCompare(CharPtr s1, CharPtr s2);
+//StrCopy not supported
+//StrItoA not supported
+//StrItoH not supported
+UInt     StrLen(CharPtr str);
+//StrStr not supported
+//StrToLower not supported
+
+//sys
+palmos 1.0
+Err      SysAppLaunch(UInt cardNo, LocalID dbID, UInt launchFlags, Word cmd, Ptr cmpPBP, DWord* resultP);
+Err      SysAppLaunch(UInt cardNo, LocalID dbID, UInt launchFlags, Word cmd, Handle cmpPBP, DWord* resultP);
+Err      SysFatalAlert(CharPtr msg);
+UInt     SysBatteryInfo(Boolean set, UIntPtr warnThresholdP, UIntPtr criticalThresholdP, UIntPtr maxTicksP, SysBatteryKind* kindP, Boolean* pluggedIn);
+Err      SysBroadcastActionCode(Word cmd, Ptr cmdPBP);
+void     SysCopyStringResource(CharBuf string, UInt theID);
+Err      SysCurAppDatabase(UIntPtr cardNoP, LocalID* dbIDP);
+VoidHand SysFormPointerArrayToStrings(CharPtr c, Int stringCount);
+Boolean  SysHandleEvent(EventPtr eventP);
+//void     SysInsertionSort(Byte baseP, Int numOfElements, Int width, CmpFuncPtr comparF, Long other);
+void     SysKeyboardDialog() = sysTrapSysKeyboardDialogV10;
+Word     SysLibFind(CharPtr name, UIntPtr refNum);
+//void     SysQSort(Byte baseP, Int numOfElements, Int width, CmpFuncPtr comparF, Long other);
+Int      SysRandom(ULong newSeed);
+void     SysReset();
+UInt     SysSetAutoOffTime(UInt seconds);
+Err      SysTaskDelay(Long delay);
+Err      SysUIAppSwitch(UInt cardNo, LocalID dbID, Word cmd, Ptr cmdPBP);
+Err      SysUIAppSwitch(UInt cardNo, LocalID dbID, Word cmd, Handle cmdPBP);
+palmos 2.0
+// RCM 11/16/01 Added to allow loading 3rd party Shared libraries
+Err      SysLibRemove(UInt refNum);
+Err      SysLibLoad(ULong libType, ULong libCreator, UIntPtr refNumP);
+// 12/19/01 RCM added to get real number of ticks per second
+UInt huge SysTicksPerSecond();
+// RCM 9/10/02 Added to allow control of the keyboard that comes up
+// Keyboard types are:  kbdAlpha = 0, kbdNumbersAndPunc = 1, kbdAccent = 2, kbdDefault = 0xff
+void     SysKeyboardDialog(KeyboardType kbd);
+voidptr  SysGetTrapAddress(UInt16 trapNum);
+palmos 3.0
+// RCM 11/13/01 Added to get the operating system version string
+CharPtr  SysGetOSVersionString();
+// RCM 11/04/02 Added to get the ROMToken string, for Symbol devices, updated 10/2/2003 PMD
+palmos 1.0
+Err      SysGetROMToken(UInt16 cardNo, UInt32 token, ULongPtr dataP, UIntPtr sizeP) = sysTrapHwrGetROMToken;
+Err		 SysLibOpen(UInt16 refNum) = sysLibTrapOpen;
+Err		 SysLibClose(UInt16 refNum) = sysLibTrapClose;
+Err	     SysLibSleep(UInt16 refNum) = sysLibTrapSleep;
+Err      SysLibWake(UInt16 refNum) = sysLibTrapWake;
+
+//tbl
+palmos 1.0
+void     TblDrawTable(TablePtr table);
+Boolean  TblEditing(TablePtr table);
+void     TblEraseTable(TablePtr table);
+Boolean  TblFindRowData(TablePtr table, ULong data, WordPtr rowP);
+Boolean  TblFindRowID(TablePtr table, Word id, WordPtr rowP);
+void     TblGetBounds(TablePtr table, RectanglePtr r);
+Word     TblGetColumnSpacing(TablePtr table, Word column);
+Word     TblGetColumnWidth(TablePtr table, Word column);
+FieldPtr TblGetCurrentField(TablePtr table);
+void     TblGetItemBounds(TablePtr table, Word row, Word column, RectanglePtr r);
+Word     TblGetItemInt(TablePtr table, Word row, Word column);
+Word     TblGetLastUsableRow(TablePtr table);
+Word     TblGetNumberOfRows(TablePtr table);
+ULong    TblGetRowData(TablePtr table, Word row);
+Word     TblGetRowHeight(TablePtr table, Word row);
+Word     TblGetRowID(TablePtr table, Word row);
+Boolean  TblGetSelection(TablePtr table, WordPtr rowP, WordPtr columnP);
+void     TblGrabFocus(TablePtr table, Word row, Word column);
+Boolean  TblHandleEvent(TablePtr table, EventPtr event);
+void     TblInsertRow(TablePtr table, Word row);
+void     TblMarkRowInvalid(TablePtr table, Word row);
+void     TblMarkTableInvalid(TablePtr table);
+void     TblRedrawTable(TablePtr table);
+void     TblReleaseFocus(TablePtr table);
+void     TblRemoveRow(TablePtr table, Word row);
+Boolean  TblRowInvalid(TablePtr table, Word row);
+Boolean  TblRowSelectable(TablePtr table, Word row);
+Boolean  TblRowUsable(TablePtr table, Word row);
+void     TblSelectItem(TablePtr table, Word row, Word column);
+void     TblSetColumnSpacing(TablePtr table, Word column, Word spacing);
+void     TblSetColumnUsable(TablePtr table, Word column, Boolean usable);
+void     TblSetColumnWidth(TablePtr table, Word column, Word width);
+void     TblSetCustomDrawProcedure(TablePtr table, Word column, const TableDrawItemFuncPtr drawCallback);
+void     TblSetItemInt(TablePtr table, Word row, Word column, Word value);
+void     TblSetItemPtr(TablePtr table, Word row, Word column, VoidPtr value);
+void     TblSetItemPtr(TablePtr table, Word row, Word column, voidptr value);
+void     TblSetItemStyle(TablePtr table, Word row, Word column, TableItemStyleType type);
+void     TblSetLoadDataProcedure(TablePtr table, Word column, TableLoadDataFuncPtr loadDataCallback);
+void     TblSetRowData(TablePtr table, Word row, ULong data);
+void     TblSetRowHeight(TablePtr table, Word row, Word height);
+void     TblSetRowID(TablePtr table, Word row, Word id);
+void     TblSetRowSelectable(TablePtr table, Word row, Boolean selectable);
+void     TblSetRowUsable(TablePtr table, Word row, Boolean usable);
+void     TblSetSaveDataProcedure(TablePtr table, Word column, TableSaveDataFuncPtr saveDataCallback);
+void     TblUnhighlightSelection(TablePtr table);
+palmos 2.0
+void TblSetRowStaticHeight(TablePtr table,Int16 row, Boolean staticHeight);
+palmos 3.0
+void TblSetItemFont(TablePtr table, Int16 row, Int16 column, FontID fontID);
+palmos 3.5
+void TblSetColumnMasked (TablePtr table, Int16 column, Boolean masked);
+void TblSetRowMasked(TablePtr table, Int16 row, Boolean masked);
+Boolean TblRowMasked(TablePtr table, Int16 row);
+palmos 4.0
+Int16 TblGetNumberOfColumns(TablePtr table);
+Int16 TblGetTopRow(TablePtr table);
+void TblSetSelection(TablePtr table, Int16 row, Int16 column);
+palmos 1.0
+
+//time
+palmos 1.0
+void     DateAdjust(DatePtr dateP, Long adjustment);
+void     DateDaysToDate(ULong days, DatePtr dateP);
+void     DateSecondsToDate(ULong seconds, DatePtr dateP);
+void     DateToAscii(Byte months, Byte days, Word years, DateFormatType dateFormat, CharBuf pString);
+ULong    DateToDays(DateType date);
+void     DateToDOWDMFormat(Byte months, Byte days, Word years, DateFormatType dateFormat, CharBuf pString);
+UInt     DayOfMonth(UInt month, UInt day, UInt year);
+UInt     DayOfWeek(UInt month, UInt day, UInt year);
+UInt     DaysInMonth(UInt month, UInt year);
+Boolean  SelectDay(int* month, int* day, int* year, CharPtr title) = sysTrapSelectDayV10;
+void     DayDrawDaySelector(const DaySelectorPtr pSelector);
+void     TimAdjust(DateTimePtr dateTimeP, Long adjustment);
+ULong    TimDateTimeToSeconds(DateTimePtr dateTimeP);
+ULong    TimGetSeconds();
+ULong huge TimGetTicks();
+void     TimSecondsToDateTime(ULong seconds, DateTimePtr dateTimeP);
+void     TimSetSeconds(ULong seconds);
+void     TimeToAscii(Byte hours, Byte minutes, TimeFormatType timeFormat, CharBuf pString);
+palmos 2.0
+Boolean SelectDay(int selectDayBy, int* month, int* day, int* year, const CharPtr title);
+palmos 3.1
+Boolean  SelectOneTime(int* hour, int* minute, const CharPtr title);
+palmos 3.3
+Boolean SelectTime(TimePtr startTime, TimePtr endTime, Boolean untimed, CharPtr title, Int16 startOfDay) = sysTrapSelectTimeV33;
+palmos 3.5
+Boolean SelectTime(TimePtr startTime, TimePtr endTime, Boolean untimed, const CharPtr title, Int16 startOfDay, Int16 endOfDay, Int16 startOfDisplay);
+
+//vfs
+Err     VFSInit() = sysTrapVFSMgr selector vfsTrapInit;
+Err     VFSFileCreate(UInt16 volRefNum, const CharPtr pathName) = sysTrapVFSMgr selector vfsTrapFileCreate;
+Err     VFSFileOpen(UInt16 volRefNum, const CharPtr pathName, UInt16 openMode, FileRefPtr fileRefP) = sysTrapVFSMgr selector vfsTrapFileOpen;
+Err     VFSFileClose(FileRef fileRef) = sysTrapVFSMgr selector vfsTrapFileClose;
+Err     VFSFileReadData(FileRef fileRef, UInt32 numBytes, ByteArray bufBase, UInt32 offset, DWordPtr numBytesRead) = sysTrapVFSMgr selector vfsTrapFileReadData;
+Err     VFSFileRead(FileRef fileRef, UInt32 numBytes, ByteArray buf, DWordPtr numBytesRead) = sysTrapVFSMgr selector vfsTrapFileRead;
+Err     VFSFileWrite(FileRef fileRef, UInt32 numBytes, const ByteArray data, DWordPtr numBytesWritten) = sysTrapVFSMgr selector vfsTrapFileWrite;
+Err     VFSFileDelete(UInt16 volRefNum, const CharPtr pathName) = sysTrapVFSMgr selector vfsTrapFileDelete;
+Err     VFSFileRename(UInt16 volRefNum, const CharPtr pathName, const CharPtr newName) = sysTrapVFSMgr selector vfsTrapFileRename;
+Err     VFSFileSeek(FileRef fileRef, UInt16 origin, Int32 offset) = sysTrapVFSMgr selector vfsTrapFileSeek;
+Err     VFSFileEOF(FileRef fileRef) = sysTrapVFSMgr selector vfsTrapFileEOF;
+Err     VFSFileTell(FileRef fileRef, DWordPtr filePos) = sysTrapVFSMgr selector vfsTrapFileTell;
+Err     VFSFileSize(FileRef fileRef, DWordPtr fileSize) = sysTrapVFSMgr selector vfsTrapFileSize;
+Err     VFSFileResize(FileRef fileRef, UInt32 newSize) = sysTrapVFSMgr selector vfsTrapFileResize;
+Err     VFSFileGetAttributes(FileRef fileRef, DWordPtr attributes) = sysTrapVFSMgr selector vfsTrapFileGetAttributes;
+Err     VFSFileSetAttributes(FileRef fileRef, UInt32 attributes) = sysTrapVFSMgr selector vfsTrapFileSetAttributes;
+Err     VFSFileGetDate(FileRef fileRef, UInt16 whichDate, DWordPtr date) = sysTrapVFSMgr selector vfsTrapFileGetDate;
+Err     VFSFileSetDate(FileRef fileRef, UInt16 whichDate, UInt32 date) = sysTrapVFSMgr selector vfsTrapFileSetDate;
+Err     VFSDirCreate(UInt16 volRefNum, const CharPtr dirName) = sysTrapVFSMgr selector vfsTrapDirCreate;
+Err     VFSVolumeEnumerate(WordPtr volRefNum, DWordPtr volIterator) = sysTrapVFSMgr selector vfsTrapVolumeEnumerate;
+Err     VFSDirEntryEnumerate(FileRef dirRef, DWordPtr dirEntryIterator, FileInfoTypePtr info) = sysTrapVFSMgr selector vfsTrapDirEntryEnumerate;
+
+
+//win
+palmos 1.0
+void     WinAddWindow(WinHandle winHandle);
+void     WinClipRectangle(RectanglePtr r);
+void     WinCopyRectangle(WinHandle srcWin, WinHandle dstWin, RectanglePtr srcRect, SWord destX, SWord destY, ScrOperation mode);
+WinHandle WinCreateWindow(RectanglePtr bounds, FrameType frame, Boolean modal, Boolean focusable, WordPtr error);
+WinHandle WinCreateOffscreenWindow(SWord width, SWord height, WindowFormatType format, WordPtr error);
+void     WinDeleteWindow(WinHandle winHandle, Boolean eraseIt);
+void     WinDisableWindow(WinHandle winHandle);
+void     WinDisplayToWindowPt(SWordPtr extentX, SWordPtr extentY);
+void     WinDrawBitmap(BitmapPtr bitmap, SWord x, SWord y);
+void huge WinDrawChars(CharPtr chars, Word len, SWord x, SWord y);
+void huge WinDrawChars(CharPtr+ chars, Word len, SWord x, SWord y);
+void huge WinDrawChars(CharArray chars, Word len, SWord x, SWord y);
+void huge WinDrawChars(ByteArray chars, Word len, SWord x, SWord y);
+void     WinDrawGrayLine(SWord x1, SWord y1, SWord x2, SWord y2);
+void     WinDrawGrayRectangleFrame(FrameType frame, RectanglePtr r);
+void huge WinDrawInvertedChars(CharPtr chars, Word len, SWord x, SWord y);
+void huge WinDrawInvertedChars(CharPtr+ chars, Word len, SWord x, SWord y);
+void huge WinDrawInvertedChars(CharArray chars, Word len, SWord x, SWord y);
+void huge WinDrawInvertedChars(ByteArray chars, Word len, SWord x, SWord y);
+void     WinDrawLine(SWord x1, SWord y1, SWord x2, SWord y2);
+void     WinDrawRectangle(RectanglePtr r, Word cornerDiam);
+void     WinDrawRectangleFrame(FrameType frame, RectanglePtr r);
+void     WinDrawWindowFrame();
+void     WinEnableWindow(WinHandle winHandle);
+void huge WinEraseChars(CharPtr chars, Word len, SWord x, SWord y);
+void huge WinEraseChars(CharPtr+ chars, Word len, SWord x, SWord y);
+void huge WinEraseChars(CharArray chars, Word len, SWord x, SWord y);
+void huge WinEraseChars(ByteArray chars, Word len, SWord x, SWord y);
+void     WinEraseLine(SWord x1, SWord y1, SWord x2, SWord y2);
+void     WinEraseRectangle(RectanglePtr r, Word cornerDiam);
+void     WinEraseRectangleFrame(FrameType frame, RectanglePtr r);
+void     WinEraseWindow();
+void     WinFillLine(SWord x1, SWord y1, SWord x2, SWord y2);
+void     WinFillRectangle(RectanglePtr r, Word cornerDiam);
+WinHandle WinGetActiveWindow();
+void     WinGetClip(RectanglePtr r);
+void     WinGetDisplayExtent(SWordPtr extentX, SWordPtr extentY);
+WinHandle WinGetDisplayWindow();
+WinHandle WinGetDrawWindow();
+WinHandle WinGetFirstWindow();
+void     WinGetFramesRectangle(FrameType frame, RectanglePtr r, RectanglePtr obscuredRect);
+//void     WinGetPattern(CustomPatternType pattern);
+void     WinGetWindowBounds(RectanglePtr r);
+void     WinGetWindowExtent(SWordPtr extentX, SWordPtr extentY);
+void     WinGetWindowFrameRect(WinHandle winHandle, RectanglePtr r);
+//WinPtr   WinGetWindowPointer(WinHandle winHandle);
+void     WinInitializeWindow(WinHandle winHandle);
+void huge WinInvertChars(CharPtr chars, Word len, SWord x, SWord y);
+void huge WinInvertChars(CharPtr+ chars, Word len, SWord x, SWord y);
+void huge WinInvertChars(CharArray chars, Word len, SWord x, SWord y);
+void huge WinInvertChars(ByteArray chars, Word len, SWord x, SWord y);
+void     WinInvertLine(SWord x1, SWord y1, SWord x2, SWord y2);
+void     WinInvertRectangle(RectanglePtr r, Word cornerDiam);
+void     WinInvertRectangleFrame(FrameType frame, RectanglePtr r);
+Boolean  WinModal(WinHandle winHandle);
+void     WinPushDrawState();
+void     WinPopDrawState();
+void     WinRemoveWindow(WinHandle winHandle);
+void     WinResetClip();
+void     WinRestoreBits(WinHandle winHandle, SWord destX, SWord destY);
+WinHandle WinSaveBits(RectanglePtr sourceP, WordPtr error);
+void     WinScrollRectangle(RectanglePtr r, DirectionType direction, SWord distance, RectanglePtr vacated);
+void     WinSetActiveWindow(WinHandle winHandle);
+void     WinSetClip(RectanglePtr r);
+WinHandle huge WinSetDrawWindow(WinHandle winHandle);
+//void     WinSetPattern(CustomPatternType pattern);
+UnderlineModeType WinSetUnderlineMode(UnderlineModeType mode);
+void     WinWindowToDisplayPt(SWordPtr extentX, SWordPtr extentY);
+palmos 3.5
+// RCM
+WinHandle WinCreateBitmapWindow(BitmapPtr bitmap, UIntPtr error);
+BitmapPtr WinGetBitmap(WinHandle winHandle);
+void     WinPaintBitmap(BitmapPtr bitmap, SWord x, SWord y);
+Byte huge WinRGBToIndex(RGBColorTypePtr color);
+Byte huge WinSetForeColor(Byte foreColorIndex);
+Err      WinPalette(UInt8 operation, Int16 startIndex, UInt16 paletteEntries, VoidPtr table);
+Err      WinScreenMode(byte operation, ULongPtr width, ULongPtr height, ULongPtr depth, BooleanPtr enableColor);
+palmos 3.5
+Byte huge WinGetPixel(int x, int y);
+void huge WinDrawPixel(int x, int y);
+void huge WinPaintPixel(int x, int y);
+void huge WinErasePixel(int x, int y);
+void     WinPaintLine(SWord x1, SWord y1, SWord x2, SWord y2);
+void     WinPaintRectangle(RectanglePtr r, Word cornerDiam);
+Byte huge WinSetTextColor(Byte textColorIndex);
+Byte huge WinSetBackColor(Byte backColorIndex);
+Int16    WinSetDrawMode(Byte mode);
+void huge WinPaintChars(CharPtr chars, Word len, SWord x, SWord y);
+void huge WinPaintChars(CharPtr+ chars, Word len, SWord x, SWord y);
+void huge WinPaintChars(CharArray chars, Word len, SWord x, SWord y);
+void huge WinPaintChars(ByteArray chars, Word len, SWord x, SWord y);
+palmos 5.0 High-Density Display Feature Set
+UInt16   WinSetCoordinateSystem(UInt16 coordSys) = sysTrapHighDensityDispatch selector HDSelectorWinSetCoordinateSystem;
+UInt16   WinGetCoordinateSystem() = sysTrapHighDensityDispatch selector HDSelectorWinGetCoordinateSystem;
+Coord    WinScaleCoord(Coord coord, Boolean ceiling) = sysTrapHighDensityDispatch selector HDSelectorWinScaleCoord;
+Coord    WinUnscaleCoord(Coord coord, Boolean ceiling) = sysTrapHighDensityDispatch selector HDSelectorWinUnscaleCoord;
+void     WinScalePoint(PointType* pointP, Boolean ceiling) = sysTrapHighDensityDispatch selector HDSelectorWinScalePoint;
+void     WinUnscalePoint(PointType* pointP, Boolean ceiling) = sysTrapHighDensityDispatch selector HDSelectorWinUnscalePoint;
+void     WinScaleRectangle(RectanglePtr rect) = sysTrapHighDensityDispatch selector HDSelectorWinScaleRectangle;
+void     WinUnscaleRectangle(RectanglePtr rect) = sysTrapHighDensityDispatch selector HDSelectorWinUnscaleRectangle;
+Err      WinScreenGetAttribute(WinScreenAttrType selector, DWordPtr attr) = sysTrapHighDensityDispatch selector HDSelectorWinScreenGetAttribute;
+void     WinPaintTiledBitmap(BitmapPtr bitmap, RectanglePtr rect) = sysTrapHighDensityDispatch selector HDSelectorWinPaintTiledBitmap;
+Err	     WinGetSupportedDensity(WordPtr densityP) = sysTrapHighDensityDispatch selector HDSelectorWinGetSupportedDensity;
+void     EvtGetPenNative(WinHandle winH, WordPtr pScreenX, WordPtr pScreenY, Boolean* pPenDown) = sysTrapHighDensityDispatch selector HDSelectorEvtGetPenNative;
+void     WinPaintRoundedRectangleFrame(const RectanglePtr r, Coord width, Coord cornerRadius, Coord shadowWidth) = sysTrapHighDensityDispatch selector HDSelectorWinPaintRoundedRectangleFrame;
+palmos 5.0 1.5x Display Feature Set
+UInt32   WinSetScalingMode(UInt32 mode) = sysTrapHighDensityDispatch selector HDSelectorWinSetScalingMode;
+UInt32   WinGetScalingMode() = sysTrapHighDensityDispatch selector HDSelectorWinGetScalingMode;
+java
+    /** used for WinGet/SetCoordinate system */
+    public final static int kCoordinatesNative = 0;
+    /** used for WinGet/SetCoordinate system */
+    public final static int kCoordinatesStandard = 72;
+    /** used for WinGet/SetCoordinate system */
+    public final static int kCoordinatesOneAndAHalf = 108;
+    /** used for WinGet/SetCoordinate system */
+    public final static int kCoordinatesDouble = 144;
+    /** used for WinGet/SetCoordinate system */
+    public final static int kCoordinatesTriple = 216;
+    /** used for WinGet/SetCoordinate system */
+    public final static int kCoordinatesQuadruple = 288;
+
+    /** used for Bitmap V3 */
+    public final static int kDensityStandard = 72;
+    /** used for Bitmap V3 */
+    public final static int kDensityOneAndAHalf = 108;
+    /** used for Bitmap V3 */
+    public final static int kDensityDouble = 144;
+    /** used for Bitmap V3 */
+    public final static int kDensityTriple = 216;
+    /** used for Bitmap V3 */
+    public final static int kDensityQuadruple = 288;
+
+    /** WinScreengetAttribute value */    
+	public final static int winScreenWidth = 0;
+    /** WinScreengetAttribute value */    
+	public final static int winScreenHeight = 1;
+    /** WinScreengetAttribute value */    
+	public final static int winScreenRowBytes = 2;
+    /** WinScreengetAttribute value */    
+	public final static int winScreenDepth = 3;
+    /** WinScreengetAttribute value */    
+	public final static int winScreenAllDepths = 4;
+    /** WinScreengetAttribute value */    
+	public final static int winScreenDensity = 5;
+    /** WinScreengetAttribute value */    
+	public final static int winScreenPixelFormat = 6;
+    /** WinScreengetAttribute value */    
+	public final static int winScreenResolutionX = 7;
+    /** WinScreengetAttribute value */    
+	public final static int winScreenResolutionY = 8;
+endjava
+palmos 1.0
+
+// Handspring
+palmos 1.0 Handspring extensions
+Err HsExtKeyboardEnable(Boolean enable) = sysTrapHsSelector selector16 hsSelExtKeyboardEnable;
+
+// Palm Reporter methods
+palmos 1.0
+java
+  /** Output string from POSE to the Palm Reporter. */
+  public static void ReporterTraceOutput(String txt)
+  {
+    ReporterTraceOutput(0x8000,txt);    // hostAppClass
+  }
+  
+  /** Output string from POSE to the Palm Reporter. specifying app class */
+  public static void ReporterTraceOutput(int appClass, String txt)
+  {
+    ReporterTraceOutput(appClass, "%s", txt);
+  }
+endjava
+void ReporterTraceInit() = sysTrapHostControl selector16 hostSelectorTraceInit;
+void ReporterTraceClose() = sysTrapHostControl selector16 hostSelectorTraceClose;
+void ReporterTraceOutput(int appClass, CharPtr fmt, CharPtr txt) = sysTrapHostControl selector16 hostSelectorTraceOutputTL;
+
+// reading arbitrary blocks of memory into an array
+java
+    /** Convert a memory address range to a byte array */
+    public static byte[] Memory(int address, int length)
+    {
+        byte[] bytes = new byte[length];
+        for (int i=0; i<length; i++)
+            bytes[i] = (byte)Palm.nativeGetByte(address+i);
+        return bytes;
+    }
+endjava

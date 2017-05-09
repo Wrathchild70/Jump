@@ -1,0 +1,529 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<META NAME="Generator" CONTENT="Microsoft Word 97">
+<TITLE>Change Log for Jump 2</TITLE>
+<META NAME="CREATED" CONTENT="20021201;14461939">
+<META NAME="CHANGEDBY" CONTENT="Peter Dickerson">
+<META NAME="CHANGED" CONTENT="20021201;15103206">
+<META NAME="Template" CONTENT="D:\Program Files\Microsoft Office\Office\html.dot">
+<STYLE><!--                                          A:link { color: #0000ff }
+	A:visited { color: #800080 }
+	--></STYLE></HEAD>
+<BODY LINK="#0000ff" VLINK="#800080">
+
+<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=10 WIDTH=620>
+<TR><TD WIDTH="21%" VALIGN="MIDDLE">
+<H1><IMG SRC="min-logo.gif" WIDTH=110 HEIGHT=104></H1></TD>
+<TD WIDTH="79%" VALIGN="MIDDLE">
+<H1>Jump2 Change Log</H1>
+<H2>for Version 2.2.2</H2>
+<P>20-Febrauary-2004 by Peter Dickerson ( <A HREF="mailto:peter.dickerson@ukonline.co.uk">peter.dickerson@ukonline.co.uk</A> )</TD>
+</TR>
+</TABLE>
+
+<P>Watch the newsgroup <A HREF="news://news.superwaba.net/pilot.programmer.jump">pilot.programmer.jump</A> on the server news.superwaba.net.</P>
+<P>The current version can be found at <A HREF="http://sourceforge.net/projects/jump">http://sourceforge.net/projects/jump</A></P>
+<H2>Changes implemented for Jump 2.2.2</H2>
+<P>A new feature has been added that makes tracing a bit easier. If an application is compiled with the Jump command line option <CODE>-DREPORTER</CODE> then <CODE>JumpLog.println()</CODE> output is sent to the Palm Reporter as well as to the Jump log memo - particularly useful when using POSE. This also affects <CODE>Vm.debug()</CODE> using the SuperWabaJump toolkit.</P>
+<P>Minor improvement in the handling of the dynamic class inititialization option (-y) to produce more compact code. In particular empty class initialization methods were sometimes being called. Also java.lang.Integer was not always initialized before the first use of a static method. This could happen if the method is native. Further, Class.newInstance() could construct an instance of a class without (before) running the static class initialization. Now the class initialization is checked in the default constructor if the class is listed in the <CODE>instances=</CODE> entry of the <I>project</I><CODE>.jump</CODE> file.</P>
+<CODE><P>Palmos.Palm.PrefGetAppPreferences</CODE> (version 2) incorrectly returned <CODE>boolean</CODE> instead of <CODE>int</CODE>. This change may break old code that incorrectly used the faulty definition (for example early versions of the SuperWabaJump toolkit).</P>
+<H2>Changes implemented for Jump 2.2.1</H2>
+<P>Version 2.2 hit a problem when building applications using the Java J2SDK 1.4.2 relating to changes in the implementation of exceptions. This minor update fixes this problem.</P>
+<H2>Changes implemented for Jump 2.2</H2>
+<P>Constant strings are handled differently. The result is hugely increase capacity because much less global data is used using large and huge memory models. The number of constants strings can be as much as 4500 and the total string text can be 120 Kbytes. Four bytes of global data are used for each constant string whereas previously 14 bytes were required. If fewer strings are used then the capacity for methods is increased because inter-segment jumps also use global data. Static variables, inter-segment jumps and constant strings are the main uses of global data. The resulting code is also typically 2% smaller.</P>
+<CODE><P>Throwable.printStackTrace()</CODE> now works. Previously a stack trace would be printed for an uncaught exception but not for <CODE>printStackTrace</CODE>.</P>
+<P>UnWarp: a quiet option (-<CODE>q</CODE>) has been added to disable the display of the sign on banner. This is to help with systems that don't allow redirection of <CODE>stdout </CODE>separately from <CODE>stderr</CODE>.</P>
+<P>A minor problem with the dynamic class initialization using the <CODE>-y</CODE> option has been fixed. Superclasses of the main window class were assumed initialized but were not. This problem can show up with SuperWaba applications if there are classes in the hierarchy between the main window class and waba.ui.MainWindow.</P>
+<H2>Changes implemented for Jump 2.1.8</H2>
+<P>A new command line option (<CODE>-y</CODE>) enables generation of code that dynamically initializes classes. Normally Jump calls all the class initializers at start-up, prior to the main class application instance. With dynamic class initialization the classes are initialized only when they are first used. This results in slightly reduced speed and larger code but is more compatible with virtual machine behaviour when applications depend on the order of class initialization. This option can be set in the <I>project</I><CODE>.jump</CODE> file with <CODE>dynamic-class-init= yes</CODE>.</P>
+<P>An uncaught exception now writes a report in the <CODE>Jump log</CODE> including a stack trace. To get a symbolic trace it is necessary to compile with debug symbols. The stack trace can be disabled with <CODE>-DNO_STACKTRACE</CODE>. &nbsp;The SysFatalAlert due to an uncaught exception has been tidied up so that continuing (on POSE) simply exits the application without resetting. Previously it would produce an illegal instruction error.</P>
+<P>There is a new class <CODE>palmos.JumpLog</CODE> that gives access to the jump log.</P>
+<P>The number of constant strings that can be handled has been increased. The combined length of all constant string text has not changed.</P>
+<H2>Changes implemented for Jump 2.1.7</H2>
+<P>The <I>project</I><CODE>.jump</CODE> file is now searched for with and without the package name of the main class. This means that the <I>project</I><CODE>.jump</CODE> file can be in the current directory even when the main class is in a package. Previously, if the main class was in a package then the package name was always used as part of the filename.</P>
+<P>Removing empty entries at the beginning has reduced the sizes of object vtables. This increases the number of classes that can be used in an application because all the object tables are stored in one segment. There is no affect on the speed of the application.</P>
+<P>The <CODE>iinc</CODE> bytecode instruction now produces faster and small code in some circumstances. Specifically, when performing a decrement by 1 to 8 e.g. <CODE>x--</CODE>.</P>
+<P>The optimizer has been improved so that a number of common cases that used to produce unexpectedly poor code are now much better. These cases include &lt;<I>object</I>&gt;.&lt;<I>field</I>&gt; &lt;<I>operator</I>&gt;= &lt;<I>expression</I>&gt; e.g. <CODE>this.x += 5;</CODE> used to produce worse code than <CODE>this.x = this.x + 5;</CODE> but now they produce the same.</P>
+<P>The garbage collector is called on exit to ensure all finalizers are invoked. All static objects are set to null and the collector is called again. Previously the garbage collector was called only once ignoring the static objects and stack - this could result in finalizer code that used the static objects when invalid. Now finalizers are always invoked by the garbage collector even if <CODE>finalize()</CODE> has been called explicitly for the object. This behaviour is the same as the Sun VM. Previously, explicitly calling <CODE>finalize()</CODE>would disable <CODE>finalize()</CODE>during GC.</P>
+<P>MkApi now supports a new attribute <CODE>huge</CODE>, which indicates that a Palm OS trap is safe to use directly in the huge memory model. Without this attribute the memory semaphore is released/reserved around the trap when using huge model. This attribute also means that parameters do not need proxies. Fore example in the <CODE>palmos.api</CODE> file we have:</P>
+<CODE><P>ULong huge TimGetTicks();</P>
+</CODE><P>MkApi a new syntax added to the API file that allows the addition of new data types. Such data types are considered as pointers to structures from the API point of view and as Java classes from Java code. This feature makes it possible to use new data types without needing to extend the MkApi application code. An (unnecessary) example might be:</P>
+<CODE><P>struct EventPtr = palmos.Event;</P>
+</CODE><H2>Changes implemented for Jump 2.1.6</H2>
+<P>The documentation has been updated to show the support news group at the new site news.superwaba.net. In the transfer some articles were unavailable. The following request was posted <FONT SIZE=2><CITE>"…I could only migrate successfully messages that I had in Microsoft Outlook Express dbx format from the newsgroups pp, pp.waba, pp.codewarrior, pp.jump (this last one, messages after February 2003 were lost - about 200). If someone have pp.jump, pp.pila and/or pp.gcc available, please contact "webmaster at superwaba.com.br" and send me them, so i can migrate those messages. Note that only the headers are not enough: I need also the message bodies."</CITE> </P>
+</FONT><P>A command line option, <CODE>-B</CODE> <I>bytes</I>, has been added to the compiler, which specifies a limit for the number of bytecodes compiled into a single code segment. The more bytecodes compiled into a segment the less segments are used, and the less inter-segment calls required. In previous versions of Jump the limit was fixed at 3200. Now the limit can be between 200 and 10000. However, if the limit is too large it is possible for the code generated to overflow a segment resulting in assembler errors and faulty execution. The same affect can be achieved by using <CODE>segment-bytecode-limit=</CODE><I>bytes</I> in the <I>project</I><CODE>.jump</CODE> file.</P>
+<P>A new setting has been added to the <I>project</I><CODE>.jump</CODE> file, <CODE>called-virtually-without-instances=</CODE> <I>classlist,</I> where <I>classlist</I> is a list of classes that are known to be called virtually without instances. This setting simply suppresses warning messages about such use. This option is useful when using class libraries such as WabaJump, or the SuperWabaJump toolkit, to remove common warnings that are known to be benign.</P>
+<CODE><P>Object.clone()</CODE> for array types failed to use the correct array data. The original and the clone would alias the same data.</P>
+<P>Class <CODE>palmos.Sony</CODE> has been added. This class defines Sony-specific APIs, in particular the high-resolution display, <CODE>HR</CODE>, calls.</P>
+<P>The combined length of all constant strings was limited to about 32K bytes. This limit has been increased to about 64K bytes. The new limit applies to the large and huge memory models. For the small memory model, all code and constant data must still fit into one 64K byte code segment as before.</P>
+<P>MkApi now adds debug symbol information to then generated native interface assembler file. This debug information is only included in the <CODE>prc</CODE> file when Jump is used with debug symbols enabled (<CODE>-g</CODE>).</P>
+<P>Palm OS High-Density Display Feature methods have been added to the palmos.Palm class.</P>
+<P>The <CODE>-q</CODE> command line option for Jump has been added. It removes the main Class's package path from the assembler file name so that the assembler file is in the current directory even when the main class is in a package. Normally the file will be created in the package subdirectory. The same affect can achieved by using <CODE>asm-path-uses-package = no</CODE> in the properties file. If there is a <DFN>project</DFN><CODE>.res</CODE> file then it should also be in the current directory.</P>
+<P>Added method <CODE>Palm.SysFatalAlert(String msg)</CODE> and <CODE>Palm.SysGetTrapAddress(int trapNum)</CODE>.</P>
+<P>Parameter type for <CODE>Palm.PrefGetPreference()</CODE> fixed.</P>
+<P>Problems with <CODE>Palm.FntLineWidth(char[],int,int)</CODE> fixed.</P>
+<P>Added a few Handspring definitions to the <CODE>jump.inc</CODE> file and added <CODE>Palm.HsExtKeyboardEnable()</CODE>.</P>
+<P>Removed classes <CODE>palmos.NetHostInfoBufType</CODE> and <CODE>palmos.NetHostInfoType</CODE> because they didn't (and couldn't) reflect the underlying Palm OS types. Instead a new class <CODE>palmos.NetHostLookup</CODE> provides access to DNS lookup.</P>
+<P>The method <CODE>palmos.FntCharWidth()</CODE> would give incorrect result due to an error in parameter passing.</P>
+<P>A new command line option <CODE>-S</CODE> has been added to the Jump compiler. This option turns off the generation of stack checking code, which results in faster and more compact code. The option can be set in the <CODE>.jump</CODE> file using <CODE>check-stack = [yes|no]</CODE>.</P>
+<P>A new command line option <CODE>-A</CODE> has been added to Jump compiler. This option forces static array initializations to be honoured. Jump is very aggressive at removing code from static (class) initializations. It does this when it thinks the values are not used. However, when a static array is initialized in the static initializer the array may be created but the data intializations may be pruned. The -A option forces such initializations to be performed:</P>
+<CODE><BLOCKQUOTE>class SomeClass {</BLOCKQUOTE>
+<BLOCKQUOTE>int[] someArray = new int[2];</BLOCKQUOTE>
+<BLOCKQUOTE>static {</BLOCKQUOTE>
+<BLOCKQUOTE>someArray[0] = 1;</BLOCKQUOTE>
+<BLOCKQUOTE>someArray[1] = 99;</BLOCKQUOTE>
+<BLOCKQUOTE>}</BLOCKQUOTE>
+<BLOCKQUOTE>...</BLOCKQUOTE>
+<BLOCKQUOTE>}</BLOCKQUOTE>
+</CODE><P>In this example the <CODE>someArray[0]</CODE> and <CODE>[1]</CODE> code will be pruned even though the array will be created unless the <CODE>-A</CODE> option is used. Note also that the code below works OK even without <CODE>-A</CODE>.</P>
+<CODE><BLOCKQUOTE>class SomeClass {</BLOCKQUOTE>
+<BLOCKQUOTE>int[] someArray = new int[2]{ 1, 99 };</BLOCKQUOTE>
+<BLOCKQUOTE>...</BLOCKQUOTE>
+<BLOCKQUOTE>}</BLOCKQUOTE>
+</CODE><P>This is a work-around for a historical quirk of the way Jump works. The pruning function is intended to remove large amounts of standard class initialization that is typically unused. Clearly this option increases the prc code size a little.</P>
+<H2>Changes implemented for Jump 2.1.5</H2>
+<P>Small changes have been made to allow the Sun J2SDK 1.4.2 to work with Jump. Using J2SDK 1.4.2 produces bigger Palm OS executables because the classes have grown. For this reason it is recommended that and earlier SDK be used.</P>
+<CODE><P>Class.forName(String)</CODE> had a problem if the class was not in the default package. The hierarchy separators needed to be slashes when dots are required e.g. <CODE>Class.forName("java/lang/Integer")</CODE> would work but shouldn't, and <CODE>Class.forName("java.lang.Integer")</CODE> didn't but should.</P>
+<P>Call-back classes have been added to support Palm OS traps that use this approach, notably <CODE>palm.TblXXXX</CODE> methods.</P>
+<P>Added support for <CODE>java.lang.Runtime.freeMemory()</CODE>. This returns the size of available memory without forcing a garbage collection. For huge model this will be the free memory of the device, for other memory models it will be the amount of available dynamic heap.</P>
+<P>The Jump command line option <CODE>-DDEBUG_HEAP</CODE> generates code to turn on the Palm OS heap memory debug mode at the start of the application and to turn it off at exit. The heap memory debug mode shuffles any blocks of memory that are not locked down in an attempt to find memory allocation problems in the application. This is useful for testing interfaces to assembler routines in external libraries.</P>
+<P>The accuracy of <CODE>Math.pow(double,double)</CODE> has been improved by avoiding logarithms when the exponent is a non-negative integer.</P>
+<P>Jump can now read class files from Palm OS PDB files created by SuperWaba's Warp utility. PDB files behave in a similar way to jar and zip files, they can be specified as a component of the class path.This is seen as an aid to implementing SuperWabaJump.</P>
+<P>The String parameter of Palm.TimeToAscii() has been changed a StringBuffer since it receives a result.</P>
+<P>Support added for new call-back classes <CODE>TableDrawItemHandler</CODE>, <CODE>TableLoadDataHandler</CODE>, <CODE>TableSaveDataHandler</CODE>. Palm OS calls that use these call-back classes have been added.</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.1.4</H2>
+<P>The definitions of the Palm OS methods <CODE>palmos.Palm.DmRecordInfo</CODE> and <CODE>palmos.Palm.DmSetRecordInfo</CODE> incorrectly used a <CODE>ByteHolder</CODE> instead of a <CODE>ShortHolder</CODE>.</P>
+<P>The order or class initializations specified by the <CODE>early-init</CODE> keyword in the project .jump file was not being honored. The initializers were called before the rest but were not necessarily called in the specified order. The order is now strictly as specified by <CODE>early-init</CODE>. This gives better control over the order of class initializations and was the original intent of the keyword. The change should not affect existing applications unless you use early-init and you specified the classes in the wrong order but it worked anyway because the order was not honored.</P>
+<P>Object.toString() returns a string of the correct format, namely <I>classname</I>@<I>hexvalue</I>.</P>
+<P>A problem with inlined methods in a somewhat unusual case has been fixed. The problem occurred only at optimization level 6 for an inlined instance <I>getter</I> method when:</P>
+
+<UL>
+<LI>The returned value was <CODE>int</CODE>, <CODE>float</CODE>, object or array. </LI>
+<LI>The call was for an object that was <I>not</I> referenced directly from a local variable or argument. </LI>
+<LI>The result is assigned to a field of an object that referenced via a local variable or argument indirectly (or sometimes directly) e.g. <CODE>this.obj1.x = this.obj2.getInt();</LI></UL>
+
+</CODE><P>More Palm OS APIs have been added, notably WinPaint<I>XXX</I>.</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.1.3</H2>
+<P>Jump 2.1 introduced a peephole optimization problem, which shows itself in complex array subscripting. The problem could be fixed by changing optimzation level down to 5 (-O5) or disabling the peephole pass (-P). This version fixes this problem.</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.1.2</H2>
+<P>Jump 2.1 introduced a problem with instance constructor causing assembler error in some case. If you didn't get an error then the bug didn't bite you. The problem can only occur for a class that have instances but whose super-class doesn't and the default constructor is only referenced from one segment in multi-segment code (large or huge memory model, i.e. no problem with small model)</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.1.1</H2>
+<P>Jump 2.1 introduced a problem with accessing arrays of short due to a typo that results in assembler code that won't assemble. This has been fixed and new tests added to the SpeedTest example to check for this problem in future.</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.1</H2>
+<P>Jump 2.1 now works with Palm OS 5 devices. Previous versions of Jump worked on the Palm OS 5 simulator but failed to run on real devices when they became available. This was due to a fault in the Palm OS ARM m68k emulator used in Palm OS 5 devices. A work around has be applied to Jump to avoid using the instruction that is emulated incorrectly.</P>
+<P>A problem with the Peephole pass in versions 2.0 through 2.0.3 has been corrected. The Peephole pass should now be more robust in it consistency checking. As a result, a few more optimization case have been introduced.</P>
+<P>There was a bug in the <CODE>String.intern()</CODE> method that affected only the new memory manager (the default since version 2.0). This occurs the first time that the method is called, which is when it tries to intern all the constant strings of the app.</P>
+<P>Code generation has been improved at optimization level 6. Jump now performs register allocation for local variables, which results in faster and smaller code.</P>
+<P>The algorithm for identifying which null-pointer checks can be safely removed has been improved. Roughly 80% of null-pointer checks can now be removed at compile time. This results in improved speed for safe code.</P>
+<P>The start-up code for initializing constant strings has been streamlined. This reduces the size of the code by approximately four bytes for each string literal used. More importantly this change increases the capacity of Jump for constant strings - there is a 64K limit for all constant strings.</P>
+<P>Finalize handling has been improved so that warnings about what can be done inside <CODE>finalize()</CODE> methods are suppressed when the <CODE>-f</CODE> command line option is given (disable finalize support). Also code is now generated so that if the <CODE>finalize()</CODE> method is called explicitly in the application then <CODE>finalize()</CODE> will not be called implicitly by the garbage collector - this is done for each object separately.</P>
+<P>An experimental implementation of the a <CODE>palmos.Palm</CODE> method that requires a call-back has been included. <CODE>palmos.Palm.FrmSetEventHandler()</CODE> takes a object derived from class <CODE>palmos.FormEventHandler</CODE> as a call-back parameter. The example MenuExample has been modified to use this approach - a Palm OS memory leak in this example has also been removed.</P>
+<P>An experimental version of <CODE>Class.forName(String)</CODE> and <CODE>Class.newInstance()</CODE> have been implemented. For Class.newInstance() to succeed Jump must believe that the target class has instances. Classes that are used elsewhere in the application, such as String, will automatically have instances, but other classes can be listed in the <CODE>jump.properties</CODE> file or the project <CODE>.jump</CODE> file using the jump-instances or instances keys. For example, in the project jump file:</P>
+<CODE><P>instances= waba/fx/Image waba/ui/Edit</P>
+</CODE><P><HR></P>
+<H2>Changes implemented for Jump 2.04</H2>
+<P>Palm OS methods that had <CODE>StringBuffer</CODE> as a parameter would not work if <CODE>null</CODE> was supplied.</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.0.3</H2>
+<P>At optimization level 6 'getter' type functions can be inlined for all data types except double and long. In addition static getters are inlined as well as instance ones.</P>
+<P>Jump now supports <CODE>finalize()</CODE> methods. There are significant restrictions on what can be done, with warnings are produced at compile time for many. Support for <CODE>finalize()</CODE> methods is not included unless it is needed. It can be removed by using the <CODE>-f</CODE> command line option. The following are limitations on what can be done in a finalize method:</P>
+
+<UL>
+<LI>No object can be stored in an object field or class (static) field. This stops objects from being brought back to life. </LI>
+<LI>No instance methods can be called. This is because an object is implicitly passed to the method as <CODE>this</CODE>, which might then be stored. </LI>
+<LI>Static methods can not be called <I>if</I> they pass an object as a parameter otherwise they can. </LI>
+<LI>Objects stored in the <CODE>finalize</CODE>d instance can be referenced but they cannot be cast to another object or be tested with <CODE>instanceof</CODE>. This is because the object may already have been freed - although the fields of the object will still be intact the run-time type of the object will have been lost. </LI>
+<LI>No object creation of any type is permitted. The <CODE>finalize()</CODE> method is called from inside the garbage collector, which is not re-entrant. </LI>
+<LI>Exceptions may be thrown inside the finalize method as long as they are caught there. Note that the exception object must have been allocated in advance since no object can be created. Throwing exceptions out of the finalize method is not permitted.</LI></UL>
+
+<P>Virtual dispatch of methods is now more compact. The v-tables are now half the size they used to be.</P>
+<P>The class <CODE>palmos.Event</CODE> had incorrect definitions for scroll bar event numbers. New methods have been added to access fields of a scroll bar event.</P>
+<P>Method <CODE>Class.isPrimative()</CODE> incorrectly returned <CODE>true</CODE> for most classes.</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.0.2</H2>
+<P>A bug was discovered in version 2.0.1 where building non-wabajump applications in large or huge memory model would result in an error from Pila at optimization level 6. This version fixes this problem.</P>
+<P>The class palmos.Symbol has been added. This class was supplied by Rod Montrose - thanks. It provides methods for the control of Symbol scanners.</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.0.1</H2>
+<P>A bug was introduced in version 2.0 where division or modulo by a power-of-two constant &gt; 256 would produce an assembler error.</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.0</H2>
+<P>The default memory manager is now the new heap. To enable the old heap memory manager use <CODE>-DOLD_HEAP</CODE> at the Jump command line.</P>
+<P>The command line option <CODE>-DNO_AASTORE_CHECK</CODE> removes a time consuming check when assigning an Object to an Object array. This check is required to ensure that the object and array are compatible with each other at run-time. If the application does not do assignments that can cause the <CODE>ArrayStoreException</CODE> then this option will speed up such assignments. This option existed in earlier beta versions of Jump 2.0 but was not documented.</P>
+<P>At optimization level 6 Jump is now able to inline 'getter' type functions. It can inline functions that do nothing other than return the value of a instance field provided that the value is int, float, any object or array.</P>
+<P>A separate peephole optimizer pass has been added. This optimizer rewrites the assembler output file removing some inefficiency that is not otherwise found. This pass improves string and array performance as well as arithmetic expressions by removing unnecessary sign-extension operations and reducing the number of stack reads and writes. The peephole optimizer is automatically invoked at optimization level 6 or by the <CODE>-P</CODE> command line option.</P>
+<P>A number of String methods are now implemented natively, resulting in a significant performance improvement. Namely, <CODE>String.equals(Object)</CODE>, <CODE>String.compareTo(String)</CODE>, <CODE>String.regionMatches(int,String,int,int)</CODE>, <CODE>String.indexOf(int)</CODE>, <CODE>String.indexOf(String)</CODE>, <CODE>String.lastIndexOf(int)</CODE>, <CODE>String.startsWith(String)</CODE> and <CODE>String.endsWith(String)</CODE>. Others have been improved by better Java code (for example <CODE>String.valueOf(char)</CODE>) and by improved code generation (<CODE>String.length()</CODE> is now expanded inline). Improvements in speed are generally two- to four-fold.</P>
+<P>A code generation problem specific to the small memory model introduced in beta 12 has been fixed.</P>
+<P>Memory leaks reported by POSE have been fixed in all of the examples except MenuExample.</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.0 beta 12</H2>
+<P>This version of Jump fixes some problems with corruption using the new serial manager calls (Palm.SrmXXX). New serial manager calls have been added for SrmOpenBackground(), SrmExtOpen() and SrmExtOpenBackground(). A new form of SrmControl() has been added that is easier to use in common cases.</P>
+<P>The start-up code has been modified to allow for larger applications. If you used to get an error similar to the one below then this will help. This should only be a problem for large applications with many, many classes.</P>
+<CODE><P>jsr PilotMain(pc)<BR>
+c:\jump\jar\startup.inc(23) : warning: Displacement out of range</P>
+</CODE><P>Class palmos.Time has been added to support the Palm OS traps SelectTime() and SelectTimeV33(). Other time and date selection methods have been added to palmos.Palm, for example SelectOneTime().</P>
+<P>Some optimizations have been applied to Java.lang.String by improving the Java code and improving the generated code for byte, character and short arrays in some circumstances. String.indexOf(String) is about 2 to 3 times faster. In particular, expression that start with a byte, char or short array access can produce improved code. For example:</P><DIR>
+<DIR>
+<DIR>
+
+<CODE><P>if ( data[i] == ch )</P></DIR>
+</DIR>
+</DIR>
+
+</CODE><P>Generates better code than</P><DIR>
+<DIR>
+<DIR>
+
+<CODE><P>if ( ch == data[i] )</P></DIR>
+</DIR>
+</DIR>
+
+</CODE><P>There is a new optimization level, -O6. At this level inter-segment calls that are known to be to the same segment are replaced with direct calls. This reduces the method call overhead in many cases. If a method is never referenced via an inter-segment call then its vector in the data segment is removed. This makes more space in the data segment.</P>
+<P>The code generated for Palm OS traps that use a function number in D2 have been changed to avoid occasional corruption problems in the huge memory model (e.g. new serial manager, SrmXXX).</P>
+<P>Added <CODE>palmos.Time</CODE> class to support <CODE>SelectTime</CODE> traps.</P>
+<P>Added <CODE>Palm.SelectDay(…)</CODE> trap for Palm OS &gt;= 2.0.</P>
+<P>Added <CODE>Palm.SelectOneTime(…)</CODE> trap for Palm OS &gt;= 3.1.</P>
+<P>Added <CODE>Palm.SelectTime(…)</CODE> trap for Palm OS &gt;= 3.3.</P>
+<P>Added <CODE>Palm.SelectTime(…)</CODE> trap for Palm OS &gt;= 3.5.</P>
+<P>Added a form of <A HREF="../javadocs/palmos/Palm.html#SrmControl(int, int, palmos.IntHolder, palmos.ShortHolder)">SrmControl</A><CODE>(…)</CODE> trap that takes an <CODE>IntHolder</CODE>, making this trap easier to use.</P>
+<P>Added <CODE>palmos.SrmOpenConfig</CODE> class for use with the new SrmExtOpenXXX methods.</P>
+<P>Added <CODE>Palm.SrmExtOpen(…)</CODE> trap for Palm OS 4.0 and New Serial manager 2.0.</P>
+<P>Added <CODE>Palm.SrmExtOpenBackground(…)</CODE> trap for Palm OS 4.0 and New Serial manager 2.0.</P>
+<P>Corrected <CODE>Palm.SrmOpenBackground(…)</CODE> trap for New Serial manager 2.0 (use to report 1.0).</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.0 beta 11</H2>
+<P>This version is released to fix a problem with Object.clone() which prevented applications that used it from compiling. In addition there are additions to the palmos.Palm class to add new Palm OS trap - thanks to Rod Montrose. Finally there is an extremely minor optimization applied that reduces the code size and increases performance by a very small amount.</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.0 beta 10</H2>
+<P>Class file analysis has changed to be better inline with newer version of the JDK. Jump works with the J2SDK version 1.4 although it is recommended that any earlier version is used because earlier versions result in smaller prc files (less code bloat) and have been more thoroughly tested.</P>
+<P>Changes to the double routines to work in Palm OS 5. The double arithmetic routines were incorrectly implemented in that they relied on results being left in registers when the specification of the Palm OS traps did not guarantee it. They have been re-implemented, are smaller, very slightly faster and work in the Palm OS 5 simulator.</P>
+<P>Memory is explicitly freed back to the OS on exit. This makes it possible to write Jump apps that run in the Palm Emulator with all debugging options enabled. This feature works with all memory models using the new heap memory management <CODE>(-DNEW_HEAP</CODE>), and all memory models except huge model when using the old (default) heap.</P>
+<P>A number of minor optimizations have been added. Mostly these will not result in much improvement in performance but have improved code density by about four percent.</P>
+
+<UL>
+<LI>Jump now looks for empty methods and avoids implementing them or calling them. This is particularly useful for constructors e.g. <CODE>java.lang.Object.&lt;init&gt;</CODE> is eventually called by all constructors but is currently empty. A method that only calls an empty method will also be pruned. This results in a modest reduction in code size along with a small increase in performance. Unfortunately parameter calculations for the pruned methods are not removed because they may (be required to) trigger an exception. </LI>
+<LI>An unnecessary register load has been removed from <CODE>invokespecial</CODE> calls. When <CODE>invokespecial</CODE> was executed with <CODE>this</CODE> known to be non-null the pointer was loaded into a register in preparation for the null-pointer check that is not generated. This was a common case where an object constructor is called immediately after being created by <CODE>new</CODE>. </LI>
+<LI>Slightly more complex integer expressions can now be optimized.</LI></UL>
+
+<P>Large stack frames are now zeroed with more compact (but slightly slower) code. For smaller stack frames the original form is more compact.</P>
+<P>A few static final constants have been added to palmos.Palm to make access to feature checks easier.</P>
+<P><HR></P>
+<H2>Changes implemented for Jump 2.0 beta 9</H2>
+<P>An instance of the exception <CODE>OutOfMemoryError</CODE> is pre-allocated so that the exception can be thrown even when the heap is completely exhausted.</P>
+<P>There were problems with handling <CODE>OutOfMemoryError</CODE> in that the huge memory model would throw the exception with an incorrect stack context resulting in references to unallocated memory. Also in other memory models <CODE>new</CODE> would return <CODE>null</CODE> when memory was exhausted instead of throwing the exception, this could result in downstream errors - array allocation was not affected.</P>
+<P>If any exception was thrown but not caught then memory allocated from the OS to the heap was not freed in the huge memory model (the memory could be freed by entering and then immediately leaving the app). This should now be fixed.</P>
+<P>The kernel code has been upgraded to support a new memory manager and garbage collector (heap) that has much better performance than the original. The original heap is still the default, but the intent is to make the new one the default once it has been proven to be reliable and better. To use the new heap, add the option <B><CODE>-DNEW_HEAP</B></CODE> to the Jump command line, which can be used in combination with the memory-model options. If you have experienced long stalls when running your applications built with Jump then it is well worth trying the new heap implementation.</P>
+<P>An experimental option <B><CODE>-DNO_AASTORE_CHECK</B></CODE> can be used to improve performance of object array assignments. The Java VM specification requires a number of time consuming validity checks when assigning an object to an array element. These runtime checks verify that the object is assignment compatible with the array in question. This experimental option disables these checks but still keeps the null-pointer and array-bounds checks. I have not been able to imagine a case where such checks are necessary except where the class files have been tampered with to try to bypass security. As such I believe this option to be safe from the developer's point of view. Note that Waba and SuperWaba do no perform these checks either.</P>
+<P>The Jump compiler can cope better with projects in namespaces.</P>
+<P>So New Serial Manager palmos traps have been added to palmos.Palm.</P>
+<H3>Support for selector based system traps</H3>
+<P>The new syntax to allow the Palm OS trap name to differ from the method name has been extended further to allow the specification of a selector number. Some Palm OS traps require an 8-bit selector number loaded into register D2 - for example the new serial manager calls. Also some Palm OS traps require a 16-bit selector number pushed on the stack - for example the HostControl calls. The syntax for the first case might be:</P><DIR>
+<DIR>
+
+<CODE><P>int SrmClearErr(int portId) = sysTrapSerialDispatch selector sysSerialClearErr;</P></DIR>
+</DIR>
+
+</CODE><P>While that for the second might be:</P><DIR>
+<DIR>
+
+<CODE><P>void ReporterTraceInit() = sysTrapHostControl selector16 hostSelectorTraceInit;</P></DIR>
+</DIR>
+
+</CODE><P>Note that the selector name is checked in the same way as the trap name.</P>
+<H3>Const</H3>
+<P>The const modifier is parsed for parameter specifications. Currently it is not acted on but the intent is that such parameters will not require a proxy in the huge memory model. This should avoid some unnecessary memory copying in those case where the parameter is an input only.</P>
+<H3>Versions</H3>
+<P>The versioning syntax has been extended further to include requirement text that is used by the javadocs. This text is optional. For example:</P><DIR>
+<DIR>
+
+<CODE><P>PalmOS 2.0 New Serial manager</P></DIR>
+</DIR>
+
+</CODE><P>This will add the comment (requires New Serial Manager) to the javadocs for all subsequent methods until changed by a new <CODE>PalmOS</CODE> line.</P>
+<P><HR></P>
+<H2>Important notes for Jump 2.0 beta 7 users (and earlier)</H2>
+<P>The configuration of the <CODE>PILAINC</CODE> environment variable for Pila has changed. In earlier versions, this environment variable pointed to the Pila directory that contained <CODE>pilot.inc</CODE> and <CODE>startup.inc</CODE>. Starting with Jump 2.0 beta 8 this environment variable should point to the directory in the Jump distribution that contains <CODE>jump.inc</CODE> and <CODE>startup.inc</CODE>. This is normally the jar subdirectory. A <CODE>-p</CODE> option is provided for use with old projects that use <I>old</I> <CODE>palmos.*</CODE> implementations. See <A HREF="Jump2.htm">Jump2.htm</A> for more details.</P>
+<H2>Changes since beta 7/PMD8, 22/Feb/2002</H2>
+
+<UL>
+<LI>A class name is checked against the file name that is used to load it. If the class name does not match the file name in textual case then an exception is thrown. This is done because Java class names are case sensitive but file names (on some systems e.g. Windows&trade;) are not. A mismatch would have resulted in incorrect code being generated. </LI>
+<LI>New properties <DFN>includes</DFN> and <DFN>jump-includes</DFN> have been added that list additional files that are to be copied into the Jump assembler output. The class path is used to access the files. Such files are useful to contain definitions of trap numbers for private libraries. </LI>
+<LI>MkApi has been further updated. Please also see <A HREF="./changes to MkApi.htm">changes to MkApi.htm</A> for details. </LI>
+<LI>Additional improvements in null-pointer check removal following an '<CODE>if ( </CODE><VAR>localVar</VAR><CODE> != null )&amp;hellip;' statement. </LI>
+</CODE><LI>Slight improvement is code size and speed by using the <CODE>(a0)</CODE> addressing mode instead of <CODE>0(a0)</CODE> when accessing the first field of an object. </LI>
+<LI>Added a command line option -D<VAR>name</VAR> for the compiler. This causes <VAR>name</VAR> to be defined in the assembler output via <CODE>#define</CODE>. The purpose is to allow better testing of the compiler and runtime. This option is not documented in the compiler usage since it is&nbsp;intended for compiler developers only. </LI>
+<LI>Problem with the division of negative numbers by constant powers of two fixed (worked for x/1, x/2 but not x/4...x/256). </LI>
+<LI>The Morse example had a programming bug that resulted in an illegal memory access if no string was entered.</LI></UL>
+
+<H2>Changes since PMD7, 23/Jan/2002</H2>
+
+<UL>
+<LI>Jump now includes the file Jump.inc rather than Pilot.inc to better support later versions of PalmOS without compatibility problem. The command line <CODE>-p</CODE> option is available for use with old palmos.Palm classes. </LI>
+<LI>The layout of the code has changed to better support very large projects with many classes. Code that needs access to the class table is positioned much closer to the table. </LI>
+<LI>MkApi has changes to improve support for newer versions of PalmOS. The additional Palm class methods are still work in progress. </LI>
+<LI>The default optimization level is -O5. This is set in the jump.properties file.</LI></UL>
+
+<H2>Changes since PMD6, 18/Jan/2002</H2>
+
+<UL>
+<LI>A problem when optimization is enabled caused the allocation of non-String object arrays of fixed size to result in stack corruption - duplication of the size on the stack.</LI></UL>
+
+<H2>Changes since PMD5</H2>
+
+<UL>
+<LI>More comments have been added to the compiler code. </LI>
+<LI>The bytecode disassembly sometimes included duplicated or missing comments. This did not affect the code generated. </LI>
+<LI>The operators <CODE>&gt;&gt;&gt;</CODE>, <CODE>&gt;&gt;</CODE> and <CODE>&lt;&lt;</CODE> did not work correctly for value outside the range 0 to 31 inclusive. The VM spec is very clear on what the bytecodes should do in this case. A <CODE>&gt;&gt;&gt;</CODE> optimization case had been missed. This correction adds four bytes of code for each use of a shift by a non-constant.</LI></UL>
+
+<H2>The Jump compiler now has a non-zero return code when it throws an exception.</H2>
+<P>The compiler returns 1 if an exception was raised and 0 if it completes normally. This can be used in batch and script files to control later stages in the build process.</P>
+<H2>Support for ordering class initializers</H2>
+<P>Placing lines in one of the native assembler template files of the form</P>
+<CODE><P>;; early-init waba/sys/NativeMethods</P>
+<P>;; early-init waba/fx/NativeMethods</P>
+</CODE><P>will cause the class initializer &lt;clinit&gt; to be called early. The initializers are called in the order of appearance. Other class initializers are called in an arbitrary order after these. The command does not force a class initializer to be present if it not otherwise needed. An entry in one of the property files will have a similar affect (no yet tested).</P>
+<P>early-init = <CODE>waba/sys/NativeMethods waba/fx/NativeMethods</P>
+</CODE><H2>There was a bug in the analysis of long shift operations.</H2>
+<P>If a long shift was used in used in class initialisation an exception could be thrown at compile time.</P>
+<H2>When an exception is alerted (SysFatalAlert) the wrong method name could be reported.</H2>
+<P>When using the <CODE>-g</CODE> option of Jump to produces debug information, the method names are stored in the .prc file. Sometimes the string would not appear valid due to incorrect NUL termination. In this case the scanning would continue onto the next method in memory. Of course this was worse than no information and very frustrating! This was a problem with reporting rather than a problem with exception handling itself.</P>
+<H2>Jump now supports a command line option for selecting the optimisation level.</H2>
+<P>The Jump compiler now has a command line option <CODE>-O</CODE><DFN>n</DFN> where <DFN>n</DFN> is 0 to 3. The level can also be set in the &lt;project&gt;.jump file using the form:</P><DIR>
+<DIR>
+<DIR>
+
+<CODE><P>optimization = </CODE><DFN>n.</P></DIR>
+</DIR>
+</DIR>
+
+</DFN><P>Optimization level 0 generates essentially the same code a Jump0.7</P>
+<P>Level 1 includes D0 peephole, multiply-by-small-constant, exception handler, array initialization and return improvements.</P>
+<P>Level 2 adds removal of some null pointer checks when dereferencing 'this'.</P>
+<P>Level 3 adds removal of many more null pointer checks. Additional peephole optimizations.</P>
+<P>Level 4 adds a0 pointer caching.</P>
+<P>Level 5 adds improvements in putfield operations and arrays; often avoiding pushing the source object.</P>
+<P>Jump now requires new template files because the code generation is slightly different. This means that the code will be slightly smaller even without optimization.</P>
+<H2>Jump now supports command line options to turn off null exception and array bounds checking</H2>
+<P>There are two new global options. <CODE>-n</CODE> turns off the checking of objects for a null value before use. This is a dangerous option that should only be used if you are sure that your application does not cause such exceptions to be thrown. The benefit is smaller code size and faster execution. The option can also be set in the <DFN>project</DFN><CODE>.jump</CODE> file using the form:</P><DIR>
+<DIR>
+<DIR>
+
+<CODE><P>check-null = no</P></DIR>
+</DIR>
+</DIR>
+
+</CODE><P>The <CODE>-a</CODE> command line option turns off array bounds checking. This is a dangerous option that should only be used if you are sure that your application does not cause out-of-bounds exceptions to be thrown. The benefit is smaller code size and faster execution particularly when combined with the <CODE>-n</CODE> option. The option can also be set in the <DFN>project</DFN><CODE>.jump</CODE> file using the form:</P><DIR>
+<DIR>
+<DIR>
+
+<CODE><P>check-bounds = no</P></DIR>
+</DIR>
+</DIR>
+
+</CODE><H2>Improved code generation by simple peephole optimisations.</H2>
+<P>Normally Jump keeps the evaluation stack on the processor stack. This optimisation tries to keep the top-of-stack in a register (normally D0). Normally the resulting code is a little bit smaller, but it is faster because there is less memory traffic. Access to instance fields through a local variable also generates better code because the common sequence of loading a local variable and immediately dereferencing it to get a field value is combined into one operation. Additional peephole optimizations involve looking up to two instructions ahead in the bytecode stream to try to combine operations such as load and add.</P>
+<H2>Some case of multiplication by a small constant can be replaced to faster code.</H2>
+<P>Instruction sequences that consist of loading a small integer constant and then multiplying are now replace by various shifts and additions. The result is much faster but may result in slightly larger code. Currently the optimiser can not recognise the case where the constant is pushed first - this depends on the compiler but normally <CODE>b += a*5</CODE> will be detected but <CODE>b += 5*a</CODE> will not. Multiplies by -1 to 10, 12, 2<SUP>n</SUP>, 2<SUP> n</SUP> -1, 2<SUP> n</SUP> +1, 2<SUP> n</SUP> +2, 3*2<SUP> n</SUP> for small n only are used.</P>
+<H2>Integer division by small powers of two replaced by inline code</H2>
+<P>Integer division by a small power of two is replaced by inline code, which may be a few bytes longer than the call to a native divide routine, but much faster.</P>
+<H2>Array initialization with constants uses much less code</H2>
+<P>Code generation for something like int[] ia = { 1, 2, 3, 4 }; was diabolically long. For basic types this has been improved greatly 30-odd bytes per item down to four for byte[], char[] and short[], six bytes for int[] and float[], 8 bytes for String[], and 12 bytes for long[] and double[].</P>
+<H2>Return value short circuiting</H2>
+<P>Methods the return the result of another call can avoid pushing the results of the call and then popping them to return from the outer method. Also returns that are not at the end of a method may generate immediate return code if the return value is already in the appropriate register, otherwise a branch to the normal return code is generated (as before).</P>
+<H2>Remove null-pointer checks from 'this' pointer that dereferences inside instance methods.</H2>
+<P>Normally Jump does not know the difference between 'this' and other local variables. As a result dereferencing it to access a field results in a null pointer check. However 'this' cannot be null inside a method. This optimisation can detect some uses of 'this' and remove the null check - reads of instance variables, but not writes to instance variables or for method dispatch.</P>
+<H2>Try to avoid null pointer checks for local variable objects if they have been checked already.</H2>
+<P>This optimisation does a much more extensive analysis of the use of object references in local variables (including 'this'). As a result the compiler is slower when this optimisation is applied. It tries not to check a local variable for null when being dereferenced if it has done so before. This applies to arrays as well as other objects.</P>
+<H2>Keep one copy of the default exception handler per code segment.</H2>
+<P>This is for multi-segmented code only. It reduces the PRC size by about 3% with no change in speed.</P>
+<H2>Try to track the pointer in a0 to avoid unnecessary address load operations.</H2>
+<P>This improves field access to be as quick as locals in many cases and reduces the code size.</P>
+<H2>Reduce the size of array indexing code</H2>
+<P>Slightly more of the array indexing code is now performed in a subroutine. This reduces the code size by four bytes for each array use. Also when the array object has been checked for null already the indexing routine is shortened.</P>
+<H2>Ideas and to-do list.</H2>
+
+<UL>
+<LI>Keep one copy of the pointer not-null check code per code segment. This would increase the size of the code a little but would avoid taking an inter-segment call during normal processing. </LI>
+<LI>Extend multiply by constant to other operators. Shift, add, sub - simple experiments suggest this is not useful. </LI>
+<LI>Keep one copy of the array indexing support code per segment and add a short circuit entry-point for the case when the pointer is known to be non-null. Again this uses a small amount of extra code space but can reduce array-processing overhead by avoiding not-null checks and inter-segment calls. </LI>
+<LI>Array accessing is slow and generates much code.&nbsp;</LI></UL>
+
+<H2>File sizes</H2>
+<TABLE BORDER CELLSPACING=3 CELLPADDING=7 WIDTH=441>
+<TR><TD VALIGN="MIDDLE" COLSPAN=4>
+<P><TBODY></P>
+<COLGROUP><COL WIDTH=136><COL WIDTH=89><COL WIDTH=112><COL WIDTH=90>
+<P>Application</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="MIDDLE">
+<P>Jump beta 7</TD>
+<TD WIDTH="25%" VALIGN="MIDDLE">
+<P>Jump 2.0.2</TD>
+<TD WIDTH="45%" VALIGN="MIDDLE" COLSPAN=2>
+<P>% saving</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>AddrScan</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>42432</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">30913</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">27.10%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="MIDDLE">
+<P>Bench</TD>
+<TD WIDTH="25%" VALIGN="MIDDLE">
+<P>27583</TD>
+<TD WIDTH="25%" VALIGN="MIDDLE">
+<P>22643</TD>
+<TD WIDTH="20%" VALIGN="MIDDLE">
+<P>17.9%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>Controls</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>48530</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">36695</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">24.40%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>CoreTest</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>72106</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">51988</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">27.90%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>DecHex</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>16503</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">13533</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">18.00%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>DiceRoller</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>50036</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">36557</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">26.90%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>Hello</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>6203</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">6113</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">1.50%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>ImageSpit</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>24346</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">18694</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">23.20%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>Life</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>9562</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">8866</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">7.20%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>MenuExample</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>8130</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">7687</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">5.40%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>Morse</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>17506</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">12336</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">29.50%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>PocketWatch</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>27706</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">21234</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">23.40%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>Scribble</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>26113</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">19671</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">24.70%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>WabaJumpTest</TD>
+<TD WIDTH="25%" VALIGN="TOP">
+<P>28775</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">21497</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">25.30%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="MIDDLE">
+<P>WabaMark</TD>
+<TD WIDTH="25%" VALIGN="MIDDLE">
+<P>43235</TD>
+<TD WIDTH="25%" VALIGN="MIDDLE">
+<P>33459</TD>
+<TD WIDTH="20%" VALIGN="MIDDLE">
+<P>22.6%</TD>
+</TR>
+<TR><TD WIDTH="30%" VALIGN="TOP">
+<P>SpeedTest</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">114690</TD>
+<TD WIDTH="25%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">85608</TD>
+<TD WIDTH="20%" VALIGN="BOTTOM">
+<P ALIGN="RIGHT">25.40%</TD>
+</TR>
+</TABLE>
+
+<P>&nbsp;</P>
+<H2>The Technical Stuff</H2>
+<P>Code generation with Jump 0.7 consists of translating each instruction in isolation. The processor stack is used for the Java stack. As a result the code sequence for a bytecode pops the items it consumes from the stack and pushes any results. This can result in a lot of pop-push sequences. One way to remove these would be to perform a pass over the assembler output. A relatively simple alternative is to keep a flag that indicates if the result is in a register (D0). Each bytecode is classified as to its ability to use the top-of-stack (TOS) in D0. If an instruction can't handle its input in D0 then it is pushed before the next bytecode is processed. Code generation is able to look ahead one bytecode to see whether it can handle the result in D0, if it can't then the code generation for the current bytecode can use this information to leave the data on the stack as before. If all bytecodes are classified as require their input on the stack then the code generation will be the same as for Jump 0.7. The classifier table is initialised differently depending on the optimisation level. He result does not reduce the code size that much but it does reduce the amount of memory traffic by replacing stack operations with register ones.</P>
+<P>In Jump, pointers represent object types. Before a pointer is used to access a field or method it must be checked for null, at least in principle. Jump 0.7 will generate code to check all such uses including those that result from the use of the <VAR>this</VAR> pointer. Each method has a set of local variables, some of which represent objects. The changes here keep track of the use of such local variable objects, trying to work out if the pointer has be already checked since the last change of the variable. If the variable has been check then code for the null-pointer check is eliminated. This reduces the code size by four bytes for each occurrence because an inter-segment call is removed, but more importantly it removes a slow operation. At the start of a method the <VAR>this</VAR> pointer is assume to be non-null while all other local variable objects are assumed to be unchecked. Currently a usage graph is not constructed for a whole method. Instead, the checked status is invalidated at each jump target (label) since it is possible to get to that point by multiple routes. This is very pessimistic but safe. This approach could be extended to array accesses too but the array indexing code is already a function call which checks for null pointer usage and array bounds. Null-pointer-check elimination does not extend to static of instance fields. As a result of this analysis it is often possible to know that a pointer use originated from a local variable and that this value is still in register A0. In this case the code to load the local variables value can be eliminated. Generally at this point the pointer is also known to be non-null, so the null-pointer check is remove too.</P>
+<P><HR></P>
+<ADDRESS>Jump is…</ADDRESS>
+<ADDRESS>Copyright &copy; 1996,1997 by Greg Hewgill,</ADDRESS>
+<ADDRESS>Copyright &copy; 2000,2001 by Ralf Kleberhoff (Email: <A HREF="mailto:kleberhoff@aol.com">kleberhoff@aol.com</A>)</ADDRESS>
+<ADDRESS>Copyright &copy; 2002-2004 by Peter Dickerson (Email: <A HREF="mailto:peter.dickerson@ukonline.co.uk">peter.dickerson@ukonline.co.uk</A> )</ADDRESS>
+<P>The current active developer is Peter Dickerson</P>
+<P><HR></P>
+<FONT SIZE=2><P>Java and all Java-based trademarks and logos are trademarks or registered trademarks of Sun Microsystems, Inc. in the U.S. and other countries.</P></FONT></BODY>
+</HTML>
