@@ -12,6 +12,7 @@ Intentions
 
 I've long liked the concept of what the Jump project was doing.
 
+Probably a good idea to add some Makefiles to drive the build.
 A long time ago I had considered whether it could be utilised to target another 68000 platform, e.g. Atari ST(E).
 The JDKs 1.2, 1.3 and 1.4 can currently be used, so it could be a task to understand what bringing this up to date entails.
 (as a test, simply try leaving out the 1.2 references in the build steps)
