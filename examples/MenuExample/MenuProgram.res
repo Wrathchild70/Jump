@@ -1,0 +1,6 @@
+	res 'tver', 1, "tver0001.bin"
+	res 'tAIB', 1000, "tAIB03e8.bin"
+	res 'Talt', 1063, "Talt0427.bin"
+	res 'MBAR', 1042, "MBAR0412.bin"
+	res 'tFRM', 1004, "tFRM03ec.bin"
+	res 'tFRM', 1026, "tFRM0402.bin"
