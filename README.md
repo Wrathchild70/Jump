@@ -34,57 +34,57 @@ I've long liked the concept of what the Jump project was doing.
 
 **Step 2** - compile classes
 
-- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME -source 1.2 -target 1.2 -g *.java palmos/*.java java/lang/*.java
+- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME -source 1.2 -target 1.2 -g \*.java palmos/\*.java java/lang/\*.java
 
 **Step 3** - generate javadoc documentation for JUMP ---
 
 - javadoc -source 1.2 -sourcepath . -private -windowtitle Jump2 -d ../javadocs palmos
-- javadoc -source 1.2 -private -windowtitle Jump2-Source -d ../src_docs tools *.java
+- javadoc -source 1.2 -private -windowtitle Jump2-Source -d ../src_docs tools \*.java
 
 **Step 4** - generate the complete jarfile for JUMP
 
-- jar cvf ../jar/jump.jar *.class *.asm *.properties java/lang/*.class palmos/*.class tools/*.class
+- jar cvf ../jar/jump.jar \*.class \*.asm \*.properties java/lang/\*.class palmos/\*.class tools/\*.class
 
 **Step 5** - Build some examples (note: I use full paths to the pilrc and pila binaries)
 
 - cd ../examples/Life
 
-- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 *.java
+- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 \*.java
 - pilrc -R Life.res Life.rcp
 - java -classpath $JUMPCLASSPATH:.:$JDK2_RUNTIME Jump Life
 - pila Life.asm
 
 - cd ../Hello
 
-- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 *.java
+- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 \*.java
 - pilrc -R Hello.res Hello.rcp
 - java -classpath $JUMPCLASSPATH:.:$JDK2_RUNTIME Jump Hello
 - pila Hello.asm
 
 - cd ../Morse
 
-- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 *.java
+- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 \*.java
 - pilrc -R Morse.res Morse.rcp
 - java -classpath $JUMPCLASSPATH:.:$JDK2_RUNTIME Jump Morse
 - pila Morse.asm
 
 - cd ../DecHex
 
-- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 *.java
+- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 \*.java
 - pilrc -R DecHex.res DecHex.rcp
 - java -classpath $JUMPCLASSPATH:.:$JDK2_RUNTIME Jump DecHex
 - pila DecHex.asm
 
 - cd ../MenuExample
 
-- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 *.java
+- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 \*.java
 - pilrc -R MenuProgram.res MenuProgram.rcp
 - java -classpath $JUMPCLASSPATH:.:$JDK2_RUNTIME Jump MenuProgram
 - pila MenuProgram.asm
 
 - cd ../SpeedTest
 
-- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 *.java
+- javac -Xbootclasspath:$JDK2_RUNTIME -cp $JDK2_RUNTIME:$JUMPCLASSPATH:. -source 1.2 -target 1.2 \*.java
 - pilrc -R SpeedTest.res SpeedTest.rcp
 - java -classpath $JUMPCLASSPATH:.:$JDK2_RUNTIME Jump SpeedTest
 - pila SpeedTest.asm
